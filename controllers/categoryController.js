@@ -25,6 +25,8 @@ const createCategory = async (req, res) => {
 // Get all categories with optional pagination
 const getAllCategories = async (req, res) => {
   try {
+    console.log("======================================== getAllCategories ============================================");
+
     // Set default values for page and limit if not provided
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 10; // Default to 10 categories per page
@@ -34,21 +36,31 @@ const getAllCategories = async (req, res) => {
 
     // Fetch categories with pagination
     const categories = await Category.find().skip(skip).limit(limit);
+    // console.log("categories: ", categories);
 
     // Get total count of categories (for pagination info)
     const totalCategories = await Category.countDocuments();
 
     // Prepare response with pagination info
-    res.status(200).json({
-      totalCategories,
-      totalPages: Math.ceil(totalCategories / limit),
-      currentPage: page,
-      categories,
-    });
+    res.status(200).json({ totalCategories, totalPages: Math.ceil(totalCategories / limit), currentPage: page, categories, });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+const getCategoriesForSelection = async (req, res) => {
+  console.log("======================= getCategoriesForSelection ============================");
+
+  try {
+    const result = await Category.find()
+    if (result) {
+      return res.status(200).json({ categories: result });
+    }
+    return res.status(404).json({ message: "No category found!", success: false });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 // Get a single category by ID
 const getCategoryById = async (req, res) => {
@@ -102,4 +114,5 @@ module.exports = {
   getCategoryById,
   updateCategory,
   deleteCategory,
+  getCategoriesForSelection
 };
