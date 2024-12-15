@@ -196,7 +196,7 @@ exports.getTopRatedAstrologers = async (req, res, next) => {
 // @route   PUT /api/v1/astrologers/:id/toggle-availability
 // @access  Private/Astrologer
 exports.toggleAstrologerAvailability = async (req, res, next) => {
-  console.log("================================== toggle Astrologer availability ===========================================");
+  // console.log("================================== toggle Astrologer availability ===========================================");
 
   try {
     let astrologer = await Astrologer.findById(req.params.id);
