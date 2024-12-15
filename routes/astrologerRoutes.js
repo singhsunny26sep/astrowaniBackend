@@ -46,7 +46,7 @@ router.post("/create", protect, authorize("admin"), createAstrologerWithAccount)
 router.put("/:id", protect, authorize("admin"), updateAstrologer);
 router.delete("/:id", protect, authorize("admin"), deleteAstrologer);
 
-router.put('/update-online', protect, authorize("astrologer"), updatedStatusAstro)
+router.put('/update-online', protect, updatedStatusAstro)
 
 // Astrologer only routes
 router.put(

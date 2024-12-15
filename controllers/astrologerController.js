@@ -112,7 +112,10 @@ exports.updateAstrologer = async (req, res, next) => {
 
 
 exports.updatedStatusAstro = async (req, res) => {
+  // console.log("==================================== updateStatusAstro ================================");
+
   const id = req.user?._id
+  // const id = req.body.id
   const online = req.body?.status
   try {
     const checkAstro = await User.findOne({ _id: id, role: "astrologer" })
