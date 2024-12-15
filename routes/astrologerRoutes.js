@@ -49,10 +49,6 @@ router.delete("/:id", protect, authorize("admin"), deleteAstrologer);
 router.put('/update-online', protect, updatedStatusAstro)
 
 // Astrologer only routes
-router.put(
-  "/:id/toggle-availability",
-  authorize("astrologer"),
-  toggleAstrologerAvailability
-);
+router.put("/:id/toggle-availability", protect, authorize("astrologer"), toggleAstrologerAvailability);
 
 module.exports = router;
