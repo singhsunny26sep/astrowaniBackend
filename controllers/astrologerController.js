@@ -196,25 +196,20 @@ exports.getTopRatedAstrologers = async (req, res, next) => {
 // @route   PUT /api/v1/astrologers/:id/toggle-availability
 // @access  Private/Astrologer
 exports.toggleAstrologerAvailability = async (req, res, next) => {
+  console.log("================================== toggle Astrologer availability ===========================================");
+
   try {
     let astrologer = await Astrologer.findById(req.params.id);
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: `Astrologer not found with id of ${req.params.id}`,
-      });
+      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
     }
 
     // Ensure the astrologer can only toggle their own availability
     if (
-      astrologer.userId.toString() !== req.user.id &&
-      req.user.role !== "admin"
+      astrologer.userId.toString() !== req.user.id && req.user.role !== "admin"
     ) {
-      return res.status(401).json({
-        success: false,
-        error: `User ${req.user.id} is not authorized to update this astrologer`,
-      });
+      return res.status(401).json({ success: false, error: `User ${req.user.id} is not authorized to update this astrologer`, });
     }
 
     astrologer.isAvailable = !astrologer.isAvailable;
@@ -401,16 +396,10 @@ exports.getAstrologerCharges = async (req, res) => {
 // @access  Public
 exports.getAstrologerUsingToken = async (req, res, next) => {
   try {
-    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate(
-      "specialties",
-      "name"
-    );
+    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate("specialties", "name");
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: `Astrologer not found with id of ${req.params.id}`,
-      });
+      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
     }
 
     res.status(200).json({ success: true, data: astrologer });
