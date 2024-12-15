@@ -95,7 +95,7 @@ exports.getChatHistory = async (req, res) => {
 
 exports.getAllChatHistory = async (req, res) => {
   const userId = req.user._id;
-  // const userId = "6728a2ab0729a58cf740fd74"
+  // const userId = "675eb06a8014cedd97c194b6"
   try {
     /* const chat = await Chat.find({ sender: userId }).populate("receiver")
     const chats = await Chat.aggregate([
