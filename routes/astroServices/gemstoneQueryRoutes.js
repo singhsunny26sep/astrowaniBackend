@@ -6,7 +6,9 @@ const { protect } = require("../../middleware/authMiddleware");
 
 
 // Create a new query
-router.post("/gemstone-query",protect, gemstoneQueryController.createGemstoneQuery);
+router.post("/gemstone-query", protect, gemstoneQueryController.createGemstoneQuery);
+
+router.post("/gemstone-query/mobile", gemstoneQueryController.createGemstoneQueryWeb);
 
 // Get all queries
 router.get("/get-all-queries", gemstoneQueryController.getAllQueries);

@@ -6,7 +6,34 @@ exports.createGemstoneQuery = async (req, res) => {
     const { userId, gemstoneId, queryType, message } = req.body;
 
     const newQuery = new GemstoneQuery({
-      userId:req.user._id,
+      userId: req.user._id,
+      gemstoneId,
+      queryType,
+      message,
+    });
+
+    const savedQuery = await newQuery.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Query submitted successfully.",
+      data: savedQuery,
+    });
+  } catch (error) {
+    console.error("Error creating gemstone query:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit query.",
+    });
+  }
+};
+
+exports.createGemstoneQueryWeb = async (req, res) => {
+  try {
+    const { userId, gemstoneId, queryType, message } = req.body;
+
+    const newQuery = new GemstoneQuery({
+      userId: userId,
       gemstoneId,
       queryType,
       message,
