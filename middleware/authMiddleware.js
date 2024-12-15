@@ -12,8 +12,8 @@ exports.protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
-  console.log("1");
-  console.log(token);
+  // console.log("1");
+  // console.log(token);
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Not authorized to access this route" });
@@ -28,6 +28,8 @@ exports.protect = async (req, res, next) => {
     //   "Token expires at:",
     //   new Date(decoded.exp * 1000).toISOString()
     // );
+    console.log("decoded: ", decoded);
+
     req.user = await User.findById(decoded.id);
     console.log(req.user);
 
