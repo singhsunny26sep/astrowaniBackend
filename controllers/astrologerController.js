@@ -117,12 +117,14 @@ exports.updatedStatusAstro = async (req, res) => {
   const id = req.user?._id
   // const id = req.body.id
   const online = req.body?.status
+
+  let value = online == 'true' ? true : false
   try {
     const checkAstro = await User.findOne({ _id: id, role: "astrologer" })
     if (!checkAstro) {
       return res.status(404).json({ success: false, message: "Astrologer not found" });
     }
-    checkAstro.online = online
+    checkAstro.online = value
     const result = await checkAstro.save()
     if (!result) {
       return res.status(404).json({ success: false, message: `Failed to ${online} Astrologer!` });
