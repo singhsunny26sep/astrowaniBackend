@@ -4,6 +4,8 @@ const thoughtController = require("../controllers/thoughtController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 
+router.get("/", thoughtController.getAllThoughts);
+
 router.get('/latest', thoughtController.getLatestThought);
 
 router.use(protect, authorize('admin'));
@@ -13,7 +15,6 @@ router.use(protect, authorize('admin'));
 router.post("/", thoughtController.createThought);
 
 // Get all thoughts
-router.get("/", thoughtController.getAllThoughts);
 
 // Route to update a thought to be the latest
 router.put('/update-latest', thoughtController.updateToLatestThought);

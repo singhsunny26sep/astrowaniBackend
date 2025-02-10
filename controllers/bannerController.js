@@ -59,19 +59,13 @@ exports.setBanner = async (req, res) => {
       existingBanner.imageUrl = imageUrl || existingBanner.imageUrl;
       await existingBanner.save();
 
-      return res.status(200).json({
-        message: "Banner updated successfully",
-        banner: existingBanner,
-      });
+      return res.status(200).json({ message: "Banner updated successfully", banner: existingBanner, });
     } else {
       // Create a new banner if no active banner exists
       const newBanner = new Banner({ title, description, imageUrl, isActive: true });
       await newBanner.save();
 
-      return res.status(201).json({
-        message: "Banner created successfully",
-        banner: newBanner,
-      });
+      return res.status(201).json({ message: "Banner created successfully", banner: newBanner, });
     }
   } catch (error) {
     console.error("Error setting banner:", error);
@@ -90,10 +84,7 @@ exports.deleteBanner = async (req, res) => {
       return res.status(404).json({ message: "Banner not found" });
     }
 
-    res.status(200).json({
-      message: "Banner deleted successfully",
-      banner,
-    });
+    res.status(200).json({ message: "Banner deleted successfully", banner, });
   } catch (error) {
     console.error("Error deleting banner:", error);
     res.status(500).json({ message: "Failed to delete banner" });
@@ -102,37 +93,29 @@ exports.deleteBanner = async (req, res) => {
 
 // Get all banners (for management) with optional pagination
 exports.getAllBanners = async (req, res) => {
-    try {
-      const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
-  
-      // Convert to integers for pagination calculations
-      const pageNumber = parseInt(page, 10);
-      const limitNumber = parseInt(limit, 10);
-  
-      // Calculate skip value for pagination
-      const skip = (pageNumber - 1) * limitNumber;
-  
-      // Fetch banners with pagination
-      const banners = await Banner.find()
-        .sort({ createdAt: -1 }) // Sort banners by most recent
-        .skip(skip)
-        .limit(limitNumber);
-  
-      // Total count for banners
-      const totalBanners = await Banner.countDocuments();
-  
-      // Response with pagination details
-      res.status(200).json({
-        data: banners,
-        totalBanners,
-        totalPages: Math.ceil(totalBanners / limitNumber),
-        currentPage: pageNumber,
-        hasNextPage: pageNumber * limitNumber < totalBanners,
-        hasPrevPage: pageNumber > 1,
-      });
-    } catch (error) {
-      console.error("Error fetching all banners:", error);
-      res.status(500).json({ message: "Failed to fetch banners" });
-    }
-  };
-  
+  try {
+    const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+
+    // Convert to integers for pagination calculations
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    // Calculate skip value for pagination
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Fetch banners with pagination
+    const banners = await Banner.find()
+      .sort({ createdAt: -1 }) // Sort banners by most recent
+      .skip(skip)
+      .limit(limitNumber);
+
+    // Total count for banners
+    const totalBanners = await Banner.countDocuments();
+
+    // Response with pagination details
+    res.status(200).json({ data: banners, totalBanners, totalPages: Math.ceil(totalBanners / limitNumber), currentPage: pageNumber, hasNextPage: pageNumber * limitNumber < totalBanners, hasPrevPage: pageNumber > 1, });
+  } catch (error) {
+    console.error("Error fetching all banners:", error);
+    res.status(500).json({ message: "Failed to fetch banners" });
+  }
+};

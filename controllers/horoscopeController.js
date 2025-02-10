@@ -5,13 +5,7 @@ exports.createHoroscope = async (req, res) => {
   try {
     const { zodiacSign, type, date, description, luckyNumber, luckyColor } = req.body;
     const horoscope = new Horoscope({
-      zodiacSign,
-      type,
-      date,
-      description,
-      luckyNumber,
-      luckyColor,
-      createdBy: req.astrologerId, // Assuming astrologer's ID is retrieved from middleware
+      zodiacSign, type, date, description, luckyNumber, luckyColor, createdBy: req.astrologerId, // Assuming astrologer's ID is retrieved from middleware
     });
     const savedHoroscope = await horoscope.save();
     res.status(201).json(savedHoroscope);

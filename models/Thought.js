@@ -19,7 +19,7 @@ const thoughtSchema = new mongoose.Schema(
             default: Date.now,
         },
     },
-    { timestamps: true, strict: false  }
+    { timestamps: true, strict: false }
 );
 
 module.exports = mongoose.model("Thought", thoughtSchema);

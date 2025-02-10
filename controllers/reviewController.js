@@ -6,7 +6,7 @@ const { default: mongoose } = require("mongoose");
 exports.createReview = async (req, res) => {
   try {
     const { astrologerId, rating, comment } = req.body;
-    const userId = req.user._id; 
+    const userId = req.user._id;
 
     // Check if the astrologer exists
     const astrologer = await Astrologer.findById(astrologerId);
@@ -25,19 +25,12 @@ exports.createReview = async (req, res) => {
     //     .json({ message: "You have already reviewed this astrologer" });
     // }
 
-    const newReview = new Review({
-      user: userId,
-      astrologer: astrologerId,
-      rating,
-      comment,
-    });
+    const newReview = new Review({ user: userId, astrologer: astrologerId, rating, comment, });
 
     const savedReview = await newReview.save();
     res.status(201).json(savedReview);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating review", error: error.message });
+    res.status(500).json({ message: "Error creating review", error: error.message });
   }
 };
 
@@ -45,34 +38,20 @@ exports.createReview = async (req, res) => {
 exports.getAllReviews = async (req, res) => {
   try {
     const { astrologerId } = req.params;
-    const reviews = await Review.find()
-      .populate({
-        path: "user", // Path to the field to be populated
-        select: "firstName lastName email profilePic", // Select specific fields to return
-      })
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find().populate({ path: "user", select: "firstName lastName email profilePic", }).sort({ createdAt: -1 });
     res.status(200).json(reviews);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching reviews", error: error.message });
+    res.status(500).json({ message: "Error fetching reviews", error: error.message });
   }
 };
 // Get all reviews for an astrologer
 exports.getAstrologerReviews = async (req, res) => {
   try {
     const { astrologerId } = req.params;
-    const reviews = await Review.find({ astrologer: astrologerId })
-      .populate({
-        path: "user", // Path to the field to be populated
-        select: "firstName lastName email profilePic", // Select specific fields to return
-      })
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find({ astrologer: astrologerId }).populate({ path: "user", select: "firstName lastName email profilePic", }).sort({ createdAt: -1 });
     res.status(200).json(reviews);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching reviews", error: error.message });
+    res.status(500).json({ message: "Error fetching reviews", error: error.message });
   }
 };
 
@@ -90,9 +69,7 @@ exports.updateReview = async (req, res) => {
 
     // Check if the user owns this review
     if (review.user.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to update this review" });
+      return res.status(403).json({ message: "You are not authorized to update this review" });
     }
 
     review.rating = rating;
@@ -101,9 +78,7 @@ exports.updateReview = async (req, res) => {
     const updatedReview = await review.save();
     res.status(200).json(updatedReview);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error updating review", error: error.message });
+    res.status(500).json({ message: "Error updating review", error: error.message });
   }
 };
 
