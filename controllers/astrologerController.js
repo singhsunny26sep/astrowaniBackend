@@ -2,6 +2,8 @@ const Astrologer = require("../models/astrologerModel");
 const User = require("../models/userModel");
 const Session = require('../models/sessionModel');
 const Chat = require('../models/chatModel');
+const CallHistory = require("../models/CallHistory");
+const { default: mongoose } = require("mongoose");
 
 
 const getTodayDateRange = () => {
@@ -54,11 +56,14 @@ exports.getAstrologers = async (req, res, next) => {
 // @route   GET /api/v1/astrologers/:id
 // @access  Public
 exports.getAstrologer = async (req, res, next) => {
+  console.log("DETAILS ASTROLOGER");
+  
   try {
     const astrologer = await Astrologer.findById(req.params.id).populate(
-      "specialties",
-      "name"
+      "userId",
+      "specialties name"
     );
+    
 
     if (!astrologer) {
       return res.status(404).json({
@@ -112,19 +117,14 @@ exports.updateAstrologer = async (req, res, next) => {
 
 
 exports.updatedStatusAstro = async (req, res) => {
-  // console.log("==================================== updateStatusAstro ================================");
-
   const id = req.user?._id
-  // const id = req.body.id
   const online = req.body?.status
-
-  let value = online == 'true' ? true : false
   try {
     const checkAstro = await User.findOne({ _id: id, role: "astrologer" })
     if (!checkAstro) {
       return res.status(404).json({ success: false, message: "Astrologer not found" });
     }
-    checkAstro.online = value
+    checkAstro.online = online
     const result = await checkAstro.save()
     if (!result) {
       return res.status(404).json({ success: false, message: `Failed to ${online} Astrologer!` });
@@ -196,20 +196,25 @@ exports.getTopRatedAstrologers = async (req, res, next) => {
 // @route   PUT /api/v1/astrologers/:id/toggle-availability
 // @access  Private/Astrologer
 exports.toggleAstrologerAvailability = async (req, res, next) => {
-  // console.log("================================== toggle Astrologer availability ===========================================");
-
   try {
     let astrologer = await Astrologer.findById(req.params.id);
 
     if (!astrologer) {
-      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
+      return res.status(404).json({
+        success: false,
+        error: `Astrologer not found with id of ${req.params.id}`,
+      });
     }
 
     // Ensure the astrologer can only toggle their own availability
     if (
-      astrologer.userId.toString() !== req.user.id && req.user.role !== "admin"
+      astrologer.userId.toString() !== req.user.id &&
+      req.user.role !== "admin"
     ) {
-      return res.status(401).json({ success: false, error: `User ${req.user.id} is not authorized to update this astrologer`, });
+      return res.status(401).json({
+        success: false,
+        error: `User ${req.user.id} is not authorized to update this astrologer`,
+      });
     }
 
     astrologer.isAvailable = !astrologer.isAvailable;
@@ -220,6 +225,37 @@ exports.toggleAstrologerAvailability = async (req, res, next) => {
     res.status(500).json({ success: false, error: "Server Error" });
   }
 };
+exports.toggleOnlineAstrologerAvailability = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // Fetch the astrologer document using the associated userId
+    const astrologer = await Astrologer.findOne({ userId });
+
+    if (!astrologer) {
+      return res.status(404).json({
+        success: false,
+        error: "Astrologer not found",
+      });
+    }
+
+    // Toggle the availability status
+    astrologer.isAvailable = !astrologer.isAvailable;
+    await astrologer.save();
+
+    return res.status(200).json({
+      success: true,
+      data: astrologer,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: "Server Error",
+    });
+  }
+};
+
 
 // @desc    Create new astrologer with user account
 // @route   POST /api/v1/astrologers/create
@@ -284,11 +320,107 @@ exports.createAstrologerWithAccount = async (req, res, next) => {
 
 
 // Controller to get today's earnings and chat count for an astrologer
+// exports.getAstrologerTodayStats = async (req, res) => {
+//   try {
+
+//     const astrologerId = req.user._id; // Get the astrologer's ID from the token
+//     const { todayStart, todayEnd } = getTodayDateRange();
+
+//     // Get total earnings for today
+//     const sessionsToday = await Session.find({
+//       astrologerId,
+//       startTime: { $gte: todayStart, $lte: todayEnd },
+//       status: 'completed',
+//     });
+
+//     const totalEarnings = sessionsToday.reduce((acc, session) => acc + (session.totalCharge || 0), 0);
+
+//     // Get the count of chats for today
+//     const chatsTodayCount = await Chat.countDocuments({
+//       sessionId: { $in: sessionsToday.map(session => session._id) },
+//       sentAt: { $gte: todayStart, $lte: todayEnd },
+//     });
+
+
+//     res.status(200).json({
+//       success: true,
+//       data: {
+//         totalEarnings,
+//         totalCallsCount: 9,
+//         chatsCount: chatsTodayCount,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server Error',
+//       error: error.message,
+//     });
+//   }
+// };
+
+// exports.getAstrologerTodayStats = async (req, res) => {
+//   try {
+//     const astrologerId = req.user._id; // Get the astrologer's ID from the token
+//     const { todayStart, todayEnd } = getTodayDateRange(); // Utility function to get start and end of today
+
+//     // Get total earnings for today
+//     const sessionsToday = await Session.find({
+//       astrologerId,
+//       startTime: { $gte: todayStart, $lte: todayEnd },
+//       status: 'completed',
+//     });
+
+//     const totalEarnings = sessionsToday.reduce((acc, session) => acc + (session.totalCharge || 0), 0);
+
+//     // Get the count of chats for today
+//     const chatsTodayCount = await Chat.countDocuments({
+//       sessionId: { $in: sessionsToday.map(session => session._id) },
+//       sentAt: { $gte: todayStart, $lte: todayEnd },
+//     });
+
+//     // Get today's distinct user count for calls
+//     const todaysCallCount = await CallHistory.aggregate([
+//       {
+//         $match: {
+//           astrologerId,
+//           callStartTime: { $gte: todayStart, $lte: todayEnd },
+//           callStatus: 'completed',
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: '$userId', // Group by user ID to get distinct users
+//         },
+//       },
+//       {
+//         $count: 'distinctUsers', // Count distinct user IDs
+//       },
+//     ]);
+
+//     const totalCallUsers = todaysCallCount.length > 0 ? todaysCallCount[0].distinctUsers : 0;
+
+//     res.status(200).json({
+//       success: true,
+//       data: {
+//         totalEarnings,
+//         totalCallsCount: totalCallUsers,
+//         chatsCount: chatsTodayCount,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server Error',
+//       error: error.message,
+//     });
+//   }
+// };
+
 exports.getAstrologerTodayStats = async (req, res) => {
   try {
-
     const astrologerId = req.user._id; // Get the astrologer's ID from the token
-    const { todayStart, todayEnd } = getTodayDateRange();
+    const { todayStart, todayEnd } = getTodayDateRange(); // Utility function to get start and end of today
 
     // Get total earnings for today
     const sessionsToday = await Session.find({
@@ -301,14 +433,33 @@ exports.getAstrologerTodayStats = async (req, res) => {
 
     // Get the count of chats for today
     const chatsTodayCount = await Chat.countDocuments({
-      sessionId: { $in: sessionsToday.map(session => session._id) },
+      sessionId: { $in: sessionsToday.map((session) => session._id) },
       sentAt: { $gte: todayStart, $lte: todayEnd },
     });
+
+    // Get today's distinct user count for calls
+    const callUsersAggregation = await CallHistory.aggregate([
+      {
+        $match: {
+          astrologerId: new mongoose.Types.ObjectId(astrologerId),
+          callStartTime: { $gte: todayStart, $lte: todayEnd },
+          callStatus: 'completed',
+        },
+      },
+      {
+        $group: {
+          _id: '$clientId', // Group by client ID to get distinct users
+        },
+      },
+    ]);
+
+    const totalCallUsers = callUsersAggregation.length;
 
     res.status(200).json({
       success: true,
       data: {
         totalEarnings,
+        totalCallsCount: totalCallUsers,
         chatsCount: chatsTodayCount,
       },
     });
@@ -320,6 +471,8 @@ exports.getAstrologerTodayStats = async (req, res) => {
     });
   }
 };
+
+
 // Enable/Disable Chat
 exports.enableDisableChat = async (req, res) => {
   try {
@@ -396,10 +549,16 @@ exports.getAstrologerCharges = async (req, res) => {
 // @access  Public
 exports.getAstrologerUsingToken = async (req, res, next) => {
   try {
-    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate("specialties", "name");
+    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate(
+      "userId",
+      "firstName lastName email phoneNumber gender "
+    );
 
     if (!astrologer) {
-      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
+      return res.status(404).json({
+        success: false,
+        error: `Astrologer not found with id of ${req.params.id}`,
+      });
     }
 
     res.status(200).json({ success: true, data: astrologer });

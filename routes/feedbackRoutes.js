@@ -3,7 +3,7 @@ const router = express.Router();
 const feedbackController = require("../controllers/feedbackController");
 const { protect } = require("../middleware/authMiddleware");
 
-router.use(protect)
+// router.use(protect)
 
 // Feedback Routes
 router.post("/", feedbackController.createFeedback); 

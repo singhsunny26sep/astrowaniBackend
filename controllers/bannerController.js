@@ -15,6 +15,32 @@ exports.getCurrentBanner = async (req, res) => {
 };
 
 // Create or update a banner
+// exports.setBanner = async (req, res) => {
+//   const { title, description, imageUrl } = req.body;
+
+//   if (!imageUrl) {
+//     return res.status(400).json({ message: "Image URL is required" });
+//   }
+
+//   try {
+//     // Deactivate existing banners
+//     await Banner.updateMany({ isActive: true }, { isActive: false });
+
+//     // Create a new banner
+//     const newBanner = new Banner({ title, description, imageUrl, isActive: true });
+//     await newBanner.save();
+
+//     res.status(201).json({
+//       message: "Banner set successfully",
+//       banner: newBanner,
+//     });
+//   } catch (error) {
+//     console.error("Error setting banner:", error);
+//     res.status(500).json({ message: "Failed to set banner" });
+//   }
+// };
+
+// Create or update a banner
 exports.setBanner = async (req, res) => {
   const { title, description, imageUrl } = req.body;
 
@@ -23,22 +49,36 @@ exports.setBanner = async (req, res) => {
   }
 
   try {
-    // Deactivate existing banners
-    await Banner.updateMany({ isActive: true }, { isActive: false });
+    // Check if an active banner already exists
+    const existingBanner = await Banner.findOne({ isActive: true });
 
-    // Create a new banner
-    const newBanner = new Banner({ title, description, imageUrl, isActive: true });
-    await newBanner.save();
+    if (existingBanner) {
+      // Update the existing active banner
+      existingBanner.title = title || existingBanner.title;
+      existingBanner.description = description || existingBanner.description;
+      existingBanner.imageUrl = imageUrl || existingBanner.imageUrl;
+      await existingBanner.save();
 
-    res.status(201).json({
-      message: "Banner set successfully",
-      banner: newBanner,
-    });
+      return res.status(200).json({
+        message: "Banner updated successfully",
+        banner: existingBanner,
+      });
+    } else {
+      // Create a new banner if no active banner exists
+      const newBanner = new Banner({ title, description, imageUrl, isActive: true });
+      await newBanner.save();
+
+      return res.status(201).json({
+        message: "Banner created successfully",
+        banner: newBanner,
+      });
+    }
   } catch (error) {
     console.error("Error setting banner:", error);
     res.status(500).json({ message: "Failed to set banner" });
   }
 };
+
 
 // Delete a banner by ID
 exports.deleteBanner = async (req, res) => {

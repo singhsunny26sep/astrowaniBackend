@@ -228,27 +228,54 @@ const { getAccessToken } = require("../../helpers/accessToken");
 
 const BASE_URL = process.env.PROKERALA_API_BASE_URL;
 
+// const makeApiRequest = async (endpoint, params) => {
+//   try {
+//     const token = await getAccessToken();
+//     // console.log("token: ", token);
+
+//     const response = await axios.get(`${BASE_URL}${endpoint}`, {
+//       params,
+//       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Error fetching data from ${endpoint}:`, error.message);
+//     if (error.response) {
+//       throw new Error(
+//         `API Error: ${error.response.status} - ${error.response.data.message || "Unknown error"
+//         }`
+//       );
+//     }
+//     throw new Error("Internal Server Error");
+//   }
+// };
+
 const makeApiRequest = async (endpoint, params) => {
   try {
     const token = await getAccessToken();
-    // console.log("token: ", token);
+    console.log("Access Token:", token);
+    console.log("Request Params:", params);
 
     const response = await axios.get(`${BASE_URL}${endpoint}`, {
       params,
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
     console.error(`Error fetching data from ${endpoint}:`, error.message);
     if (error.response) {
+      console.error("API Response Error:", error.response.data);
       throw new Error(
-        `API Error: ${error.response.status} - ${error.response.data.message || "Unknown error"
-        }`
+        `API Error: ${error.response.status} - ${JSON.stringify(error.response.data) || "Unknown error"}`
       );
     }
     throw new Error("Internal Server Error");
   }
 };
+
 
 const handleApiRequest = async (req, res, apiCall) => {
   // console.log("============================= API request =============================");
@@ -344,14 +371,25 @@ exports.getJanamKundali = async (req, res) => {
 exports.getKundaliMatch = async (req, res) => {
   const { maleDetails, femaleDetails } = req.body;
 
+  // const params = {
+  //   ayanamsa: 1,
+  //   boy_coordinates: `${maleDetails.location.latitude},${maleDetails.location.longitude}`,
+  //   boy_dob: `${maleDetails.date}T${maleDetails.time}:00Z`,
+  //   girl_coordinates: `${femaleDetails.location.latitude},${femaleDetails.location.longitude}`,
+  //   girl_dob: `${femaleDetails.date}T${femaleDetails.time}:00Z`,
+  //   la: "en",
+  // };
+
   const params = {
     ayanamsa: 1,
-    boy_coordinates: `${maleDetails.location.latitude},${maleDetails.location.longitude}`,
-    boy_dob: `${maleDetails.date}T${maleDetails.time}:00Z`,
-    girl_coordinates: `${femaleDetails.location.latitude},${femaleDetails.location.longitude}`,
-    girl_dob: `${femaleDetails.date}T${femaleDetails.time}:00Z`,
+    boy_coordinates: `${maleDetails?.location?.latitude},${maleDetails?.location?.longitude}`,
+    boy_dob: `${maleDetails?.date}T${maleDetails?.time}Z`, 
+    girl_coordinates: `${femaleDetails?.location?.latitude},${femaleDetails?.location?.longitude}`,
+    girl_dob: `${femaleDetails?.date}T${femaleDetails?.time}Z`, 
     la: "en",
   };
+  
+  
 
   await handleApiRequest(req, res, () =>
     makeApiRequest("/astrology/kundli-matching", params)

@@ -22,4 +22,7 @@ router.get("/", sessionController.getSessions); // Get session history for astro
 router.put("/:id", sessionController.updateSession); // Update a session
 router.delete("/:id", sessionController.deleteSession); // Delete a session
 
+// Route to get all sessions by clientId with optional pagination
+router.get("/client/:clientId", sessionController.getSessionsByClientId);
+
 module.exports = router;

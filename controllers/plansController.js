@@ -1,5 +1,6 @@
 // planController.js
 const Plan = require("../models/plansModel");
+const userModel = require("../models/userModel");
 
 exports.createPlan = async (req, res) => {
   try {
@@ -18,6 +19,48 @@ exports.createPlan = async (req, res) => {
       success: false,
       message: "Failed to create plan.",
     });
+  }
+};
+
+exports.buyPlan = async (req, res) => {
+  try {
+    const { planId } = req.body;
+    const userId = req.user._id; // Assumes `protect` middleware attaches `req.user`
+
+    // Validate the provided plan ID
+    const plan = await Plan.findById(planId);
+    if (!plan) {
+      return res.status(404).json({ success: false, message: "Plan not found." });
+    }
+
+    // Fetch the user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Calculate the new plan's start and end dates
+    const startDate = new Date();
+    const endDate = new Date(startDate.getTime() + plan.duration * 24 * 60 * 60 * 1000); // Add duration in days
+
+    // Update the user's active plan
+    user.activePlan = {
+      planId: plan._id,
+      startDate: startDate,
+      endDate: endDate,
+      remainingMessages: plan.maxMessages || 0,
+      remainingSize: plan.maxMessageSize || 0,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `You have successfully purchased the plan: ${plan.name}.`,
+      activePlan: user.activePlan,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

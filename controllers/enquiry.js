@@ -2,25 +2,48 @@ const Enquiry = require("../models/Enquiry")
 
 
 exports.getEnquiry = async (req, res) => {
-    const id = req.params?.id
+    const id = req.params?.id;
+    const { page = 1, limit = 10 } = req.query; // Default page is 1 and limit is 10
+
     try {
         if (id) {
-            const enquiry = await Enquiry.findById(id)
+            const enquiry = await Enquiry.findById(id);
             if (!enquiry) {
                 return res.status(404).json({ message: "Enquiry not found", success: false });
             }
             return res.status(200).json({ message: "Enquiry fetched successfully", result: enquiry, success: true });
         }
-        const enquiries = await Enquiry.find({}).sort({ createdAt: -1 });
-        if (enquiries) {
-            return res.status(200).json({ message: "Enquiries fetched successfully", result: enquiries, success: true });
+
+        const skip = (page - 1) * limit; // Calculate the number of documents to skip
+        const enquiries = await Enquiry.find({})
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
+        const totalCount = await Enquiry.countDocuments(); // Get total number of enquiries
+        const totalPages = Math.ceil(totalCount / limit); // Calculate total pages
+
+        if (enquiries.length > 0) {
+            return res.status(200).json({
+                message: "Enquiries fetched successfully",
+                result: enquiries,
+                meta: {
+                    totalCount,
+                    totalPages,
+                    currentPage: Number(page),
+                    limit: Number(limit),
+                },
+                success: true,
+            });
         }
+
         return res.status(404).json({ message: "Enquiries not found!", success: false });
     } catch (error) {
         console.log("error on getEnquiry", error);
         return res.status(500).json({ message: error.message, error, success: false });
     }
-}
+};
+
 
 
 exports.addEnquiry = async (req, res) => {
