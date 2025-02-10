@@ -13,14 +13,40 @@ exports.createRequest = async (req, res) => {
 };
 
 // Get all requests
+// AstrologerRequestController.js
+
 exports.getAllRequests = async (req, res) => {
     try {
-        const requests = await AstrologerRequest.find();
-        res.status(200).json({ success: true, data: requests });
+        const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+        const skip = (page - 1) * limit; // Skip the number of records based on page number and limit
+
+        const requests = await AstrologerRequest.find()
+            .skip(skip)
+            .limit(Number(limit)); // Set the limit
+
+        const totalRequests = await AstrologerRequest.countDocuments(); // Get total number of requests
+
+        const totalPages = Math.ceil(totalRequests / limit); // Calculate total pages
+
+        res.status(200).json({
+            success: true,
+            data: requests,
+            meta: {
+                totalRequests,
+                totalPages,
+                currentPage: Number(page),
+                perPage: Number(limit),
+            },
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to fetch requests', error: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch requests',
+            error: error.message,
+        });
     }
 };
+
 
 // Get a single request by ID
 exports.getRequestById = async (req, res) => {

@@ -9,18 +9,22 @@
     "seed": "node seed/index.js",
     "build": "dist "
   },
+  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "agora-token": "^2.0.3",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
+    "btoa": "^1.2.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase-admin": "^13.0.1",
     "jsonwebtoken": "^9.0.2",
+    "log4js": "^6.9.1",
     "mongoose": "^8.5.4",
     "nodemailer": "^6.9.14",
     "socket.io": "^4.8.1"

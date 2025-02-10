@@ -26,9 +26,9 @@ exports.getAccessToken = async () => {
     const data = await response.json();
     accessToken = data.access_token;
 
-    console.log("Access token: ", accessToken);
+    // console.log("Access token: ", accessToken);
 
-    console.log("response: ", response);
+    // console.log("response: ", response);
 
 
     // Set the expiration time (current time + token lifetime in milliseconds)

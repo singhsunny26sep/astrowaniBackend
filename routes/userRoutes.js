@@ -16,6 +16,7 @@ const {
   requestAstroOTP,
   registerAstrologer,
   updateAstrologerProfile,
+  getUserById,
 } = require("../controllers/userControllers");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -34,5 +35,8 @@ router.get("/get-all-users", protect, getAllUser);
 router.put("/profile", protect, updateProfile);
 router.put("/update-astrologer-profile", protect, updateAstrologerProfile);
 router.put("/update-password", protect, updatePassword);
+
+// Route to get user details by ID
+router.get("/:userId", getUserById);
 
 module.exports = router;

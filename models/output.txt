@@ -1,144 +1,4 @@
 ﻿=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\astroServices\gemstoneQuery.js
-
-const mongoose = require("mongoose");
-
-const gemstoneQuerySchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    gemstoneId: { type: mongoose.Schema.Types.ObjectId, ref: "Gemstone", required: true },
-    queryType: { type: String, enum: ["purchase", "inquiry"], default: "inquiry" },
-    message: { type: String, required: true },
-    status: { type: String, enum: ["pending", "resolved", "cancelled"], default: "pending" },
-    response: { type: String },
-    respondedAt: { type: Date },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("GemstoneQuery", gemstoneQuerySchema);
-
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\astroServices\gemstoneSchema.js
-
-const mongoose = require("mongoose");
-
-const gemstoneSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true },
-    images: [{ type: String }],
-    availability: { type: Boolean, default: true },
-    additionalInfo: {
-      carat: { type: Number, required: true },
-      zodiacSign: { type: String },
-      weightInRatti: Number,
-      weightInGrams: Number,
-      colour: String,
-      origin: String,
-      quality: String,
-      shape: String,
-      mantra: String,
-      size: String,
-      certification: String,
-      treatment: String,
-    },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("Gemstone", gemstoneSchema);
-
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\astroServices\groupPujaSchema.js
-
-const mongoose = require("mongoose");
-
-const groupPujaSchema = new mongoose.Schema(
-  {
-    pujaName: { type: String, required: true },
-    description: { type: String, required: true },
-    bio: { type: String },
-    pujaSold: { type: Number },
-    pujaGodGoddes: { type: String },
-    date: { type: Date, required: true },
-    duration: { type: String, required: true }, // e.g., '2 hours'
-    location: { type: String, required: true },
-    price: { type: Number, required: true },
-    maxParticipants: { type: Number, required: true },
-    bookedParticipants: { type: Number, default: 0 },
-    image: { type: String },
-    Benefits: [String],
-    astrologer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Astrologer",
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("GroupPuja", groupPujaSchema);
-
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\astroServices\vipPujaSchema.js
-
-const mongoose = require("mongoose");
-
-const vipPujaSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    image: { type: String },
-    description: {
-      type: String,
-      required: true,
-    },
-    pujaSold: {
-      type: Number,
-      default: 0, // Assuming this tracks the number of times the puja has been sold
-    },
-    typesOfPuja: {
-      type: String,
-      enum: ["laghu", "maha", "beej mantra", "puranic", "vedic"],
-      required: true,
-    },
-    daysOfPuja: {
-      type: Number,
-      required: true, // Number of days the puja takes
-    },
-    pujaGodGoddess: {
-      type: String,
-      required: true, // Name of the God or Goddess the puja is for
-    },
-    typeOfMantra: {
-      type: String,
-      required: true,
-    },
-    gender: {
-      type: String,
-      enum: ["both", "male", "female"],
-      default: "both",
-    },
-    benefits: {
-      type: [String], // Array of strings for the benefits of the puja
-      required: true,
-    },
-    price: { type: Number, required: true },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("VipPuja", vipPujaSchema);
-
-
-=======================================================================
 E:\WORK\ABS\Projects\Astrology\server\models\appointmentModel.js
 
 const mongoose = require("mongoose");
@@ -300,22 +160,6 @@ module.exports = Astrologer;
 
 
 =======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\astrologerRequestModel.js
-
-const mongoose = require('mongoose');
-
-const astrologerRequestSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true },
-    expertise: { type: String, required: true },
-    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
-}, { timestamps: true });
-
-module.exports = mongoose.model('AstrologerRequest', astrologerRequestSchema);
-
-
-=======================================================================
 E:\WORK\ABS\Projects\Astrology\server\models\BannerModel.js
 
 const mongoose = require("mongoose");
@@ -345,46 +189,6 @@ const bannerSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Banner", bannerSchema);
-
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\blogModel.js
-
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
-
-const BlogSchema = new Schema(
-  {
-    english: {
-      title: { type: String, required: true },
-      slug: { type: String, required: true, unique: true },
-      content: { type: String, required: true },
-      excerpt: { type: String },
-      metaDescription: { type: String },
-      keywords: [{ type: String }],
-    },
-    hindi: {
-      title: { type: String, required: true },
-      slug: { type: String, required: true, unique: true },
-      content: { type: String, required: true },
-      excerpt: { type: String },
-      metaDescription: { type: String },
-      keywords: [{ type: String }],
-    },
-    slug: { type: String, required: true, unique: true },
-    thumbnail: { type: String, required: true },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
-
-const Blog = mongoose.model("Blog", BlogSchema);
-
-module.exports = Blog;
 
 
 =======================================================================
@@ -437,31 +241,6 @@ module.exports = mongoose.model("CallHistory", CallHistorySchema);
 
 
 =======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\categoryModel.js
-
-const mongoose = require("mongoose");
-
-const categorySchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    image: String,
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const Category = mongoose.model("Category", categorySchema);
-
-module.exports = Category;
-
-
-=======================================================================
 E:\WORK\ABS\Projects\Astrology\server\models\chatModel.js
 
 const mongoose = require("mongoose");
@@ -471,20 +250,21 @@ const chatSchema = new mongoose.Schema(
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Session",
-      required: true,
+      // required: true,
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // or "Astrologer" based on role
+      ref: "User", 
+      required: true,
+    },
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
       required: true,
     },
     message: {
       type: String,
       required: true,
-    },
-    sentAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   { timestamps: true }
@@ -561,7 +341,7 @@ const ConsultationSchema = new mongoose.Schema(
   );
   module.exports =mongoose.model("Consultation", ConsultationSchema);
 
-=======================================================================
+=============================================================
 E:\WORK\ABS\Projects\Astrology\server\models\horoscopeModel.js
 
 const mongoose = require('mongoose');
@@ -604,57 +384,6 @@ const horoscopeSchema = new mongoose.Schema({
 
 module.exports = mongoose.model('Horoscope', horoscopeSchema);
 
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\navgrahModel.js
-
-const mongoose = require('mongoose');
-
-const navgrahSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  remedies: {
-    type: String, // Remedies associated with the graha
-    required: false,
-  },
-  mantra: {
-    type: String, // Mantra for the graha
-    required: false,
-  },
-  effects: {
-    type: String, // Effects of the graha in a chart
-    required: false,
-  },
-  deity: {
-    type: String, // Deity associated with the graha
-    required: false,
-  },
-  color: {
-    type: String, // Color associated with the graha
-    required: false,
-  },
-  gemstone: {
-    type: String, // Gemstone associated with the graha
-    required: false,
-  },
-  metal: {
-    type: String, // Metal associated with the graha
-    required: false,
-  },
-  status: {
-    type: Boolean, // Enable or disable the graha display
-    default: true,
-  },
-}, { timestamps: true });
-
-module.exports = mongoose.model('Navgrah', navgrahSchema);
 
 
 =======================================================================
@@ -732,6 +461,9 @@ const planSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     price: { type: Number, required: true },
+    maxMessages: { type: Number}, 
+    maxMessageSize: { type: Number}, 
+    duration: { type: Number, required: true, default: 28  }, 
     questions: { type: Number, required: true },
     includesRemedies: { type: Boolean, required: true },
   },
@@ -803,7 +535,7 @@ const sessionSchema = new mongoose.Schema(
     },
     startTime: {
       type: Date,
-      required: true,
+      // required: true,
     },
     endTime: {
       type: Date,
@@ -813,7 +545,7 @@ const sessionSchema = new mongoose.Schema(
     },
     chargePerMinute: {
       type: Number,
-      required: true, // Astrologer's rate per minute
+      // required: true, // Astrologer's rate per minute
     },
     totalCharge: {
       type: Number,
@@ -835,91 +567,15 @@ const sessionSchema = new mongoose.Schema(
     feedback: {
       type: String,
     },
+    totalMessages: { type: Number, default: 0 }, // Messages sent in this session
+    totalSize: { type: Number, default: 0 }, // Total data size in KB
+    isPlanExceeded: { type: Boolean, default: false }, // Track if limits are exceeded
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("Session", sessionSchema);
 
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\support.js
-
-const mongoose = require("mongoose");
-
-const supportSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    issueType: {
-      type: String,
-      required: true,
-      enum: [
-        "Technical Issue",
-        "Account Related Issue",
-        "Refund Request",
-        "Feedback",
-        "Other",
-      ],
-      default: "General Inquiry",
-    },
-    supportType: {
-      type: String,
-      required: true,
-      enum: [
-        "Contact Support",
-        "Feedback",
-      ],
-      default: "Contact Support",
-    },
-    message: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("Support", supportSchema);
-
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\Thought.js
-
-const mongoose = require("mongoose");
-
-const thoughtSchema = new mongoose.Schema(
-    {
-        thoughtText: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        author: {
-            type: String,
-            required: false,
-            trim: true,
-            default: "Anonymous",
-        },
-        date: {
-            type: Date,
-            required: true,
-            default: Date.now,
-        },
-    },
-    { timestamps: true }
-);
-
-module.exports = mongoose.model("Thought", thoughtSchema);
 
 
 =======================================================================
@@ -993,9 +649,23 @@ const UserSchema = new mongoose.Schema(
       code: String,
       expiresAt: Date,
     },
-    fcm:{
-      type:String
-    }
+    fcm: {
+      type: String
+    },
+    activePlan: {
+      planId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Plan",
+      },
+      startDate: Date,
+      endDate: Date,
+      remainingMessages: { type: Number, default: 0 },
+      remainingSize: { type: Number, default: 0 }, // KB
+    },
+    online: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
@@ -1022,82 +692,3 @@ module.exports = mongoose.model("User", UserSchema);
 
 
 =======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\walletModel.js
-
-const mongoose = require("mongoose");
-
-const WalletSchema = new mongoose.Schema(
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        unique: true,
-      },
-      balance: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
-      currency: {
-        type: String,
-        default: "INR",
-      },
-      isActive: {
-        type: Boolean,
-        default: true,
-      },
-    },
-    { timestamps: true }
-  );
-  module.exports = mongoose.model("Wallet", WalletSchema);
-
-=======================================================================
-E:\WORK\ABS\Projects\Astrology\server\models\walletTransactionModel.js
-
-const mongoose = require("mongoose");
-const WalletTransactionSchema = new mongoose.Schema(
-    {
-      walletId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Wallet",
-        required: true,
-      },
-      type: {
-        type: String,
-        enum: ["credit", "debit"],
-        required: true,
-      },
-      amount: {
-        type: Number,
-        required: true,
-      },
-      description: {
-        type: String,
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ["pending", "completed", "failed"],
-        default: "pending",
-      },
-      referenceId: {
-        type: String,
-        // For payment gateway reference
-      },
-      metadata: {
-        // Additional information about the transaction
-        sessionId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Session",
-        },
-        appointmentId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Appointment",
-        },
-      },
-    },
-    { timestamps: true }
-  );
-  module.exports =mongoose.model("WalletTransaction", WalletTransactionSchema);
-

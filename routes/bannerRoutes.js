@@ -7,7 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 router.get("/current", bannerController.getCurrentBanner);
 
 // Set a new banner (create or update)
-router.post("/set", bannerController.setBanner);
+router.put("/set", bannerController.setBanner);
 
 // Get all banners
 router.get("/all", bannerController.getAllBanners);

@@ -595,3 +595,41 @@ exports.getConnectedAstrologers = async (req, res) => {
   }
 }
 
+// Get all sessions by clientId with optional pagination
+exports.getSessionsByClientId = async (req, res) => {
+  try {
+    const { clientId } = req.params; // Client ID from request parameters
+    const { page = 1, limit = 10 } = req.query; // Pagination parameters (default: page 1, limit 10)
+
+    // Validate clientId
+    if (!clientId) {
+      return res.status(400).json({ error: "Client ID is required." });
+    }
+
+    // Fetch sessions from the database
+    const sessions = await Session.find({ clientId })
+      .sort({ createdAt: -1 }) // Sort by most recent
+      .skip((page - 1) * limit) // Pagination: skip items
+      .limit(parseInt(limit)) // Limit the number of items
+      .populate("astrologerId", "name") // Populate astrologer details (optional)
+      .populate("clientId", "name") // Populate client details (optional)
+      .exec();
+
+    // Count total sessions for pagination metadata
+    const totalSessions = await Session.countDocuments({ clientId });
+
+    res.status(200).json({
+      success: true,
+      data: sessions,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalSessions / limit),
+        totalSessions,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching sessions:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+

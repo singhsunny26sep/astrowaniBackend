@@ -6,13 +6,11 @@ const config = require("../config/config");
 exports.protect = async (req, res, next) => {
   let token;
 
-  if (
-    req.headers.authorization && req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
-  // console.log("1");
-  // console.log(token);
+  console.log("1");
+  console.log(token);
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Not authorized to access this route" });
@@ -27,8 +25,6 @@ exports.protect = async (req, res, next) => {
     //   "Token expires at:",
     //   new Date(decoded.exp * 1000).toISOString()
     // );
-    console.log("decoded: ", decoded);
-
     req.user = await User.findById(decoded.id);
     console.log(req.user);
 
@@ -42,8 +38,6 @@ exports.protect = async (req, res, next) => {
 };
 
 exports.authorize = (...roles) => {
-  // console.log("...roles: ", roles);
-
   return (req, res, next) => {
     console.log(req.user.role);
 

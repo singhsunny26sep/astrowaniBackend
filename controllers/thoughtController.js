@@ -157,15 +157,23 @@ exports.deleteThought = async (req, res) => {
     }
 };
 
-// Update the `createdAt` field of a thought to make it the latest
+
 exports.updateToLatestThought = async (req, res) => {
-    const { thoughtId } = req.body; // Expect the ID of the thought to update in the request body
+    const { thoughtId } = req.body;
     try {
-        const updatedThought = await Thought.findByIdAndUpdate(
+        // First, disable timestamps for this operation
+        await Thought.findByIdAndUpdate(
             thoughtId,
-            { createdAt: new Date() }, // Set `createdAt` to the current timestamp
-            { new: true, timestamps: false } // Return the updated document
+            { $set: { createdAt: new Date() } },
+            { 
+                new: true,
+                timestamps: false,
+                strict: false
+            }
         );
+
+        // Then fetch the updated document to confirm the change
+        const updatedThought = await Thought.findById(thoughtId);
 
         if (!updatedThought) {
             return res.status(404).json({ message: "Thought not found." });

@@ -1,11 +1,14 @@
 // planRoutes.js
 const express = require("express");
 const router = express.Router();
-const { createPlan, getAllPlans, getPlanById, updatePlan, deletePlan } = require("../controllers/plansController");
+const { createPlan,buyPlan , getAllPlans, getPlanById, updatePlan, deletePlan } = require("../controllers/plansController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 // Get all plans
 router.get("/get-all-plans", getAllPlans);
+
+// Route to buy a plan
+router.post("/buy", protect, buyPlan);
 
 router.use(protect, authorize('admin'));
 

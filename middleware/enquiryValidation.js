@@ -1,8 +1,6 @@
 
 
 exports.addEnquiryValidation = async (req, res, next) => {
-    console.log("req.body: ", req.body);
-
     const fname = req.body?.fname
     const gender = req.body?.gender
     const dob = req.body?.dob
