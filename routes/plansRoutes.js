@@ -1,7 +1,7 @@
 // planRoutes.js
 const express = require("express");
 const router = express.Router();
-const { createPlan,buyPlan , getAllPlans, getPlanById, updatePlan, deletePlan } = require("../controllers/plansController");
+const { createPlan, buyPlan, getAllPlans, getPlanById, updatePlan, deletePlan } = require("../controllers/plansController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 // Get all plans
@@ -14,7 +14,6 @@ router.use(protect, authorize('admin'));
 
 // Create a new plan
 router.post("/create-plans", createPlan);
-
 
 
 // Get a single plan by ID

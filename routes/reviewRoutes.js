@@ -6,20 +6,14 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 router.post("/", protect, reviewController.createReview);
 
 router.get("/astrologer/:astrologerId", reviewController.getAstrologerReviews);
+
 router.get("/astrologers/reviews", reviewController.getAllReviews);
 
 router.put("/:reviewId", protect, reviewController.updateReview);
 
-router.delete(
-  "/:reviewId",
-  protect,
-  authorize("admin"),
-  reviewController.deleteReview
-);
-router.get(
-  "/astrologer/:astrologerId/average-rating",
-  reviewController.getAstrologerAverageRating
-);
+router.delete("/:reviewId", protect, authorize("admin"), reviewController.deleteReview);
+
+router.get("/astrologer/:astrologerId/average-rating", reviewController.getAstrologerAverageRating);
 
 router.get("/astrologers/top-rated", reviewController.getTopRatedAstrologers);
 

@@ -17,7 +17,7 @@ const horoscopeSchema = new mongoose.Schema({
   dateRange: {
     type: String,
     required: true,
-  },  
+  },
   description: {
     type: String,
     required: true, // Horoscope content

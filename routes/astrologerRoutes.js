@@ -1,34 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/authMiddleware");
-const {
-  getAstrologers,
-  getAstrologer,
-  createAstrologer,
-  createAstrologerWithAccount,
-  updateAstrologer,
-  deleteAstrologer,
-  getAstrologersBySpecialty,
-  getTopRatedAstrologers,
-  toggleAstrologerAvailability,
-  getAstrologerTodayStats,
-  enableDisableChat,
-  enableDisableCall,
-  getAstrologerCharges,
-  getAstrologerUsingToken,
-  updateAstrologerUsingToken,
-  updatedStatusAstro,
-  toggleOnlineAstrologerAvailability
-} = require("../controllers/astrologerController");
+const { getAstrologers, getAstrologer, createAstrologer, createAstrologerWithAccount, updateAstrologer, deleteAstrologer, getAstrologersBySpecialty, getTopRatedAstrologers, toggleAstrologerAvailability, getAstrologerTodayStats, enableDisableChat, enableDisableCall, getAstrologerCharges, getAstrologerUsingToken, updateAstrologerUsingToken, updatedStatusAstro, toggleOnlineAstrologerAvailability } = require("../controllers/astrologerController");
 
 // Public routes
 router.get("/", getAstrologers);
 router.get("/top-rated", getTopRatedAstrologers);
-router.put(
-  "/toggle-online",protect,
-  // authorize("astrologer"),
-  toggleOnlineAstrologerAvailability
-);
+router.put("/toggle-online", protect, toggleOnlineAstrologerAvailability);
 router.get('/today-stats', protect, authorize('astrologer'), getAstrologerTodayStats);
 // Route to get charge per minute for chat and call
 router.get('/charges', protect, authorize('astrologer'), getAstrologerCharges);
@@ -56,11 +34,7 @@ router.delete("/:id", protect, authorize("admin"), deleteAstrologer);
 router.put('/update-online', protect, authorize("astrologer"), updatedStatusAstro)
 
 // Astrologer only routes
-router.put(
-  "/:id/toggle-availability",protect,
-  authorize("astrologer"),
-  toggleAstrologerAvailability
-);
+router.put("/:id/toggle-availability", protect, authorize("astrologer"), toggleAstrologerAvailability);
 
 
 module.exports = router;

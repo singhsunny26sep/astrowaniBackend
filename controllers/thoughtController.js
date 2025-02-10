@@ -47,30 +47,15 @@ exports.getAllThoughts = async (req, res) => {
         const skip = (page - 1) * limit;
 
         // Fetch paginated thoughts sorted by date
-        const thoughts = await Thought.find()
-            .sort({ date: -1 }) // Sort by date in descending order
-            .skip(skip)
-            .limit(limit);
+        const thoughts = await Thought.find().sort({ date: -1 }).skip(skip).limit(limit);
 
         // Count total thoughts for meta information
         const totalThoughts = await Thought.countDocuments();
 
-        res.status(200).json({
-            success: true,
-            data: thoughts,
-            meta: {
-                currentPage: page,
-                totalPages: Math.ceil(totalThoughts / limit),
-                totalThoughts,
-                limit,
-            },
-        });
+        res.status(200).json({ success: true, data: thoughts, meta: { currentPage: page, totalPages: Math.ceil(totalThoughts / limit), totalThoughts, limit, }, });
     } catch (error) {
         console.error("Error fetching thoughts:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch thoughts.",
-        });
+        res.status(500).json({ success: false, message: "Failed to fetch thoughts.", });
     }
 };
 
@@ -81,22 +66,13 @@ exports.getThoughtById = async (req, res) => {
         const thought = await Thought.findById(req.params.id);
 
         if (!thought) {
-            return res.status(404).json({
-                success: false,
-                message: "Thought not found.",
-            });
+            return res.status(404).json({ success: false, message: "Thought not found.", });
         }
 
-        res.status(200).json({
-            success: true,
-            data: thought,
-        });
+        res.status(200).json({ success: true, data: thought, });
     } catch (error) {
         console.error("Error fetching thought:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch thought.",
-        });
+        res.status(500).json({ success: false, message: "Failed to fetch thought.", });
     }
 };
 
@@ -165,7 +141,7 @@ exports.updateToLatestThought = async (req, res) => {
         await Thought.findByIdAndUpdate(
             thoughtId,
             { $set: { createdAt: new Date() } },
-            { 
+            {
                 new: true,
                 timestamps: false,
                 strict: false
