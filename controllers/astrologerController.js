@@ -31,22 +31,12 @@ exports.getAstrologers = async (req, res, next) => {
     const total = await Astrologer.countDocuments();
 
     // Fetch astrologers with pagination and populate specialties
-    const astrologers = await Astrologer.find()
-      .populate("specialties", "name")
-      .skip(startIndex)
-      .limit(limit);
-
+    const astrologers = await Astrologer.find().populate("specialties", "name").skip(startIndex).limit(limit);
     // Calculate total pages
     const totalPages = Math.ceil(total / limit);
 
     // Send the response with pagination data
-    res.status(200).json({
-      success: true,
-      count: astrologers.length,
-      totalPages,
-      currentPage: page,
-      data: astrologers,
-    });
+    res.status(200).json({ success: true, count: astrologers.length, totalPages, currentPage: page, data: astrologers, });
   } catch (error) {
     res.status(500).json({ success: false, error: "Server Error" });
   }
@@ -57,13 +47,13 @@ exports.getAstrologers = async (req, res, next) => {
 // @access  Public
 exports.getAstrologer = async (req, res, next) => {
   console.log("DETAILS ASTROLOGER");
-  
+
   try {
     const astrologer = await Astrologer.findById(req.params.id).populate(
       "userId",
       "specialties name"
     );
-    
+
 
     if (!astrologer) {
       return res.status(404).json({

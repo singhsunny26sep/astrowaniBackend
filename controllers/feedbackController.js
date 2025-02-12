@@ -3,9 +3,11 @@ const Feedback = require("../models/feedbackModel");
 // Create Feedback
 const createFeedback = async (req, res) => {
   try {
+    // const { comment, rating, userId } = req.body;
     const { comment, rating } = req.body;
 
     const newFeedback = new Feedback({ userId: req.user._id, comment, rating, });
+    // const newFeedback = new Feedback({ userId: userId, comment, rating, });
 
     await newFeedback.save();
     res.status(201).json({ success: true, data: newFeedback });
@@ -20,8 +22,7 @@ const getAllFeedback = async (req, res) => {
     const page = parseInt(req.query.page) || 1;   // Default page is 1
 
     // Fetch feedback with pagination
-    const feedbacks = await Feedback.find()
-      .populate("userId", "firstName lastName profilePic email") // Populate user details
+    const feedbacks = await Feedback.find().populate("userId", "firstName lastName profilePic email") // Populate user details
       .limit(limit)                    // Limit results
       .skip((page - 1) * limit)        // Skip documents for pagination
       .exec();
@@ -29,15 +30,7 @@ const getAllFeedback = async (req, res) => {
     // Count total feedback for pagination info
     const totalFeedbacks = await Feedback.countDocuments();
 
-    res.status(200).json({
-      success: true,
-      data: feedbacks,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalFeedbacks / limit),
-        totalFeedbacks,
-      },
-    });
+    res.status(200).json({ success: true, data: feedbacks, pagination: { currentPage: page, totalPages: Math.ceil(totalFeedbacks / limit), totalFeedbacks, }, });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
