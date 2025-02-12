@@ -235,25 +235,16 @@ const endCall = async (req, res) => {
     const { sessionId, duration, rating, feedback } = req.body;
 
     if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Session ID is required",
-      });
+      return res.status(400).json({ success: false, message: "Session ID is required", });
     }
 
     const session = await Session.findById(sessionId);
     if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
-      });
+      return res.status(404).json({ success: false, message: "Session not found", });
     }
 
     if (session.status !== "ongoing") {
-      return res.status(400).json({
-        success: false,
-        message: "Call is not ongoing",
-      });
+      return res.status(400).json({ success: false, message: "Call is not ongoing", });
     }
     const astrologer = await Astrologer.findOne({
       userId: session.astrologerId,
@@ -261,8 +252,7 @@ const endCall = async (req, res) => {
     console.log(astrologer.callChargePerMinute);
 
     // Calculate call charges
-    const callDuration =
-      duration || Math.ceil((Date.now() - session.startTime) / 60000); // in minutes
+    const callDuration = duration || Math.ceil((Date.now() - session.startTime) / 60000); // in minutes
     const totalCharge = callDuration * astrologer.callChargePerMinute;
     console.log(totalCharge);
 
@@ -271,6 +261,7 @@ const endCall = async (req, res) => {
     session.endTime = new Date();
     session.duration = callDuration;
     session.totalCharge = totalCharge;
+
     if (rating) session.rating = rating;
     if (feedback) session.feedback = feedback;
     await session.save();
@@ -286,6 +277,10 @@ const endCall = async (req, res) => {
       rating,
       comments: feedback,
     });
+
+    astrologer.callCount = astrologer.callCount + 1;
+
+    await astrologer.save()
 
     // Notify users about call completion
     const users = await User.find({
@@ -306,19 +301,9 @@ const endCall = async (req, res) => {
       }
     }
 
-    res.status(200).json({
-      success: true,
-      data: {
-        duration: callDuration,
-        totalCharge,
-        sessionId: session._id,
-      },
-    });
+    res.status(200).json({ success: true, data: { duration: callDuration, totalCharge, sessionId: session._id, }, });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to end call",
-    });
+    res.status(500).json({ success: false, message: error.message || "Failed to end call", });
   }
 };
 // Handle missed call
@@ -327,26 +312,21 @@ const handleMissedCall = async (req, res) => {
     const { sessionId } = req.body;
 
     if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Session ID is required",
-      });
+      return res.status(400).json({ success: false, message: "Session ID is required", });
     }
 
     const session = await Session.findById(sessionId);
     if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
-      });
+      return res.status(404).json({ success: false, message: "Session not found", });
     }
 
     if (session.status !== "ongoing") {
-      return res.status(400).json({
-        success: false,
-        message: "Call is not ongoing",
-      });
+      return res.status(400).json({ success: false, message: "Call is not ongoing", });
     }
+
+    const astrologer = await Astrologer.findOne({
+      userId: session.astrologerId,
+    });
 
     // Update session
     session.status = "missed";
@@ -362,6 +342,10 @@ const handleMissedCall = async (req, res) => {
       callStatus: "missed",
     });
 
+    astrologer.callCount = astrologer.callCount + 1;
+
+    await astrologer.save()
+
     // Notify client about missed call
     const client = await User.findById(session.clientId);
     if (client?.fcm) {
@@ -374,15 +358,9 @@ const handleMissedCall = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Missed call handled successfully",
-    });
+    res.status(200).json({ success: true, message: "Missed call handled successfully", });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to handle missed call",
-    });
+    res.status(500).json({ success: false, message: error.message || "Failed to handle missed call", });
   }
 };
 

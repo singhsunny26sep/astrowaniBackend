@@ -63,18 +63,22 @@ const AstrologerSchema = new Schema(
     },
     isCallEnabled: {
       type: Boolean,
-      default: true, 
+      default: true,
     },
     chatChargePerMinute: {
       type: Number,
-      required: true, 
-      default: 0, 
+      required: true,
+      default: 0,
     },
     callChargePerMinute: {
       type: Number,
-      required: true, 
-      default: 0, 
+      required: true,
+      default: 0,
     },
+    callCount: {
+      type: Number,
+      default: 0
+    }
   },
   { timestamps: true }
 );
