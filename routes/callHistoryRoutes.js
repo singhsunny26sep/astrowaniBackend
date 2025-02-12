@@ -1,5 +1,5 @@
 const express = require("express");
-const { createCallHistory, getCallHistory, updateCallHistory, deleteCallHistory, } = require("../controllers/callHistoryController");
+const { createCallHistory, getCallHistory, updateCallHistory, deleteCallHistory, getCallHistoryByAstroId, } = require("../controllers/callHistoryController");
 const { protect } = require("../middleware/authMiddleware");
 const { initiateCall, endCall, handleMissedCall, acceptCall, } = require("../helpers/callHandlers");
 
@@ -11,6 +11,8 @@ router.post("/end", protect, endCall);
 router.post("/missed", protect, handleMissedCall);
 
 router.use(protect);
+
+router.get("/callHistoryByAstroId/:id", getCallHistoryByAstroId)
 
 router.route("/call-history").post(createCallHistory) // POST: Create call history
   .get(getCallHistory); // GET: Get call history

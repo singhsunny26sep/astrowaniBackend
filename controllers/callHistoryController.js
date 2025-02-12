@@ -63,10 +63,7 @@ exports.getCallHistory = async (req, res, next) => {
     } else if (req.user.role === "customer") {
       filter.clientId = req.user._id; // Filter by client ID
     } else {
-      return res.status(403).json({
-        success: false,
-        message: "User role is not authorized to access this route",
-      });
+      return res.status(403).json({ success: false, message: "User role is not authorized to access this route", });
     }
 
     // Fetch and populate call history
@@ -77,15 +74,30 @@ exports.getCallHistory = async (req, res, next) => {
       .limit(Number(limit))
       .sort({ callStartTime: -1 });
 
-    res.status(200).json({
-      success: true,
-      count: history.length,
-      data: history,
-    });
+    res.status(200).json({ success: true, count: history.length, data: history, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.getCallHistoryByAstroId = async (req, res) => {
+  const { limit = 10, offset = 0 } = req.query;
+  const astrologerId = req.params?.id
+  try {
+    const filter = { astrologerId };
+
+    const history = await CallHistory.find(filter)
+      .populate("astrologerId", "firstName lastName email") // Populate astrologer details
+      .populate("clientId", "firstName lastName email") // Populate client details
+      .skip(Number(offset))
+      .limit(Number(limit))
+      .sort({ callStartTime: -1 });
+
+    res.status(200).json({ success: true, count: history.length, data: history, });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
 
 // @desc    Update a call history record
 // @route   PUT /api/call-history/:id
