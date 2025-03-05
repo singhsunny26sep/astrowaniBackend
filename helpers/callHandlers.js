@@ -352,10 +352,7 @@ const handleMissedCall = async (req, res) => {
       const title = "Missed Call";
       const message = "The astrologer was unavailable";
 
-      await notificationService.sendCallMessage(title, message, client.fcm, {
-        type: "missed_call",
-        sessionId: sessionId.toString(),
-      });
+      await notificationService.sendCallMessage(title, message, client.fcm, { type: "missed_call", sessionId: sessionId.toString(), });
     }
 
     res.status(200).json({ success: true, message: "Missed call handled successfully", });
@@ -371,10 +368,7 @@ const acceptCall = async (req, res) => {
     // Fetch session details
     const session = await Session.findById(sessionId);
     if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
-      });
+      return res.status(404).json({ success: false, message: "Session not found", });
     }
 
     // Generate token for User 2
@@ -397,10 +391,7 @@ const acceptCall = async (req, res) => {
     });
   } catch (error) {
     console.error("Call acceptance error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to accept call",
-    });
+    res.status(500).json({ success: false, message: error.message || "Failed to accept call", });
   }
 };
 

@@ -104,25 +104,13 @@ exports.getCallHistoryByAstroId = async (req, res) => {
 // @access  Private
 exports.updateCallHistory = async (req, res, next) => {
   try {
-    const updatedCall = await CallHistory.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const updatedCall = await CallHistory.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, });
 
     if (!updatedCall) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Call history not found" });
+      return res.status(404).json({ success: false, message: "Call history not found" });
     }
 
-    res.status(200).json({
-      success: true,
-      data: updatedCall,
-    });
+    res.status(200).json({ success: true, data: updatedCall, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
