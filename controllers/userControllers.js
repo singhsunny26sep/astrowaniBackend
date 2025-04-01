@@ -481,11 +481,9 @@ exports.requestAstroOTP = async (req, res) => {
     `;
     await sendEmail(email, "Verify Your Account", otpHtml);
 
-    res.status(201).json({
-      success: true,
-      otp: otp,
-      message: "OTP has been sent to your email. Please check your inbox.",
-    });
+    console.log("Verify Your Account: ", otp);
+
+    res.status(201).json({ success: true, otp: otp, message: "OTP has been sent to your email. Please check your inbox.", });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
@@ -667,7 +665,6 @@ exports.verifyOTPAPI = async (req, res) => {
   try {
 
     const checkUser = await User.findOne({ mobile: mobile })
-    console.log("checkUser: ", checkUser);
 
     if (!checkUser) {
       return res.status(404).json({ success: false, msg: 'User not found' })
@@ -679,7 +676,7 @@ exports.verifyOTPAPI = async (req, res) => {
     let result = await urlVerifyOtp(sessionId, otp)
     // console.log("result: ", result);
     if (fcmToken) {
-      checkUser.fcmToken = fcmToken
+      checkUser.fcm = fcmToken
       await checkUser.save()
     }
     if (result?.Status == 'Success') {
