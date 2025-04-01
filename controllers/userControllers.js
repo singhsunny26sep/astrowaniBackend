@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Astrologer = require("../models/astrologerModel");
 const Plan = require("../models/plansModel");
+const { urlSendTestOtp, urlVerifyOtp } = require("../service/sendOtp");
 
 // exports.requestOTP = async (req, res) => {
 //   try {
@@ -630,3 +631,66 @@ exports.getUserById = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
+
+
+exports.requestOtp = async (req, res) => {
+  const mobile = req.body?.mobile;
+
+  try {
+    let checkMobile = await User.findOne({ mobile: mobile });
+    if (!checkMobile) {
+      checkMobile = new User({ mobile }); // Create a new user object
+      await checkMobile.save(); // Save the new user to the database
+    }
+
+    let result = await urlSendTestOtp(mobile);
+    if (result.Status == 'Success') {
+      return res.status(200).json({ success: true, msg: "Verification code sent successfully", result });
+    }
+    return res.status(400).json({ success: false, msg: "Failed to send verification code" });
+  } catch (error) {
+    console.error("Error requestOtp:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+
+exports.verifyOTPAPI = async (req, res) => {
+  // console.log("req.body: ", req.body);
+
+  const sessionId = req.body.sessionId
+  const otp = req.body.otp
+  const mobile = req.body?.mobile
+  const fcmToken = req.body?.fcmToken
+
+
+  try {
+
+    const checkUser = await User.findOne({ mobile: mobile })
+    console.log("checkUser: ", checkUser);
+
+    if (!checkUser) {
+      return res.status(404).json({ success: false, msg: 'User not found' })
+    }
+    if (checkUser.isActive == false) {
+      return res.status(401).json({ success: false, msg: 'Account is not active. Please contact with admin.' })
+    }
+
+    let result = await urlVerifyOtp(sessionId, otp)
+    // console.log("result: ", result);
+    if (fcmToken) {
+      checkUser.fcmToken = fcmToken
+      await checkUser.save()
+    }
+    if (result?.Status == 'Success') {
+      // const token = await generateToken(checkUser)
+      const token = checkUser.getSignedJwtToken({ expiresIn: "30d", secret: process.env.JWT_SECRET, });
+      return res.status(200).json({ success: true, msg: 'Verification successful', data: result, token })
+    }
+    return res.status(400).json({ success: false, msg: 'Verification failed' })
+
+  } catch (error) {
+    console.log("error on verifyOTP: ", error);
+    return res.status(500).json({ error: error, success: false, msg: error.message })
+  }
+}
