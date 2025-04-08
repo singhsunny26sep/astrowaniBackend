@@ -33,6 +33,7 @@ vcxutil.connectServer = (options, data, callback) => {
     res.on("end", () => {
       logger.info(`HTTP STATUS: ${res.statusCode}`);
       logger.info(`RESPONSE DATA:- ${responseData}`);
+      // console.log("res: ", res);
 
       if (res.statusCode >= 200 && res.statusCode < 300) {
         // Only parse JSON if status is 200-299

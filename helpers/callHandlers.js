@@ -597,7 +597,7 @@ const acceptCall = async (req, res) => {
       return res.status(404).json({ success: false, message: "Session not found", });
     }
 
-    console.log("session: ", session);
+    // console.log("session: ", session);
 
     // Generate token for User 2
     /* const data = {
