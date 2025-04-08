@@ -175,10 +175,7 @@ exports.register = async (req, res) => {
         </div>
       `;
     await sendEmail(email, "Verify Your Account", otpHtml);
-    res.status(201).json({
-      success: true,
-      message: "User registered. Please check your email for OTP.",
-    });
+    res.status(201).json({ success: true, message: "User registered. Please check your email for OTP.", });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
@@ -197,10 +194,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = user.getSignedJwtToken({
-      expiresIn: "30d",
-      secret: process.env.JWT_SECRET,
-    });
+    const token = user.getSignedJwtToken({ expiresIn: "30d", secret: process.env.JWT_SECRET, });
     res.status(200).json({ success: true, token });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

@@ -124,9 +124,7 @@ exports.deleteCallHistory = async (req, res, next) => {
     const deletedCall = await CallHistory.findByIdAndDelete(req.params.id);
 
     if (!deletedCall) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Call history not found" });
+      return res.status(404).json({ success: false, message: "Call history not found" });
     }
 
     res.status(200).json({ success: true, message: "Call history deleted" });

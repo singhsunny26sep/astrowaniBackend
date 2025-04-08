@@ -21,19 +21,66 @@ const creatToken = (body) => {
   }
 };
 
+const creatRoomId = async () => {
+  const newRoomObjec = {
+    name: "Demo Room",
+    settings: {
+      description: `Voice-Calling`,
+      scheduled: false,
+      participants: "10",
+      duration: "90",
+      active_talker: true,
+      auto_recording: false,
+      adhoc: true,
+      mode: "group",
+      moderators: "4",
+      quality: "SD",
+      media_zone: "IN",
+      knock: false,
+      canvas: true,
+      max_active_talkers: "6",
+      screen_share: true,
+      // audio_only: condition, //for true only audio and false so video
+      abwd: true,
+    },
+    sip: {
+      enabled: false,
+    },
+    data: {
+      name: "Demo",
+    },
+    owner_ref: "Demo",
+  };
+
+  try {
+
+    return new Promise((resolve, reject) => {
+      vcxroom.createRoom(newRoomObjec, (status, data) => {
+        if (status && data?.room?.room_id) {
+          resolve(data?.room?.room_id);
+        } else {
+          reject(new Error("Failed to create room"));
+        }
+      });
+    });
+
+  } catch (error) {
+    console.log("error on creatRoomId: ", error);
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error creating room" });
+  }
+};
+
 // Initiate a call
 const initiateCall = async (req, res) => {
   try {
-    const { receiverId, callType, roomId } = req.body;
+    const { receiverId, callType } = req.body;
     const callerId = req.user._id;
     const callerRole = req.user.role;
 
     // Validate call type
     if (!["video", "voice"].includes(callType)) {
-      return res.status(400).json({
-        success: false,
-        message: "Call type must be either video or voice",
-      });
+      return res.status(400).json({ success: false, message: "Call type must be either video or voice", });
     }
 
     // Determine astrologer and client based on caller's role
@@ -48,49 +95,32 @@ const initiateCall = async (req, res) => {
         userId: receiverId,
         isAvailable: true,
       });
+      console.log("astrologerId: ", astrologer);
 
       if (!astrologer) {
-        return res.status(404).json({
-          success: false,
-          message: "Astrologer not found or is currently unavailable",
-        });
+        return res.status(404).json({ success: false, message: "Astrologer not found or is currently unavailable", });
       }
 
       if (callType === "video" && !astrologer.isCallEnabled) {
-        return res.status(400).json({
-          success: false,
-          message: "Video calls are not enabled for this astrologer",
-        });
+        return res.status(400).json({ success: false, message: "Video calls are not enabled for this astrologer", });
       }
 
       if (callType === "voice" && !astrologer.isChatEnabled) {
-        return res.status(400).json({
-          success: false,
-          message: "Voice calls are not enabled for this astrologer",
-        });
+        return res.status(400).json({ success: false, message: "Voice calls are not enabled for this astrologer", });
       }
     } else if (callerRole === "astrologer") {
       astrologerId = callerId;
       clientId = receiverId;
 
-      const customer = await User.findOne({
-        _id: receiverId,
-        role: "customer",
-      });
+      const customer = await User.findOne({ _id: receiverId, role: "customer", });
 
       if (!customer) {
-        return res.status(404).json({
-          success: false,
-          message: "Customer not found",
-        });
+        return res.status(404).json({ success: false, message: "Customer not found", });
       }
 
       astrologer = await Astrologer.findOne({ _id: callerId });
     } else {
-      return res.status(403).json({
-        success: false,
-        message: "Only customers and astrologers can initiate calls",
-      });
+      return res.status(403).json({ success: false, message: "Only customers and astrologers can initiate calls", });
     }
 
     // Check for active calls with proper error handling
@@ -117,30 +147,18 @@ const initiateCall = async (req, res) => {
       activeCallerSession = null;
     }
 
-    if (
-      activeReceiverSession &&
-      activeReceiverSession.startTime < twoHoursAgo
-    ) {
-      await Session.findByIdAndUpdate(activeReceiverSession._id, {
-        status: "completed",
-        endTime: new Date(),
-      });
+    if (activeReceiverSession && activeReceiverSession.startTime < twoHoursAgo) {
+      await Session.findByIdAndUpdate(activeReceiverSession._id, { status: "completed", endTime: new Date(), });
       activeReceiverSession = null;
     }
 
     // Now check for active sessions after cleaning up stale ones
     if (activeCallerSession) {
-      return res.status(400).json({
-        success: false,
-        message: "You already have an active call",
-      });
+      return res.status(400).json({ success: false, message: "You already have an active call", });
     }
 
     if (activeReceiverSession) {
-      return res.status(400).json({
-        success: false,
-        message: "Receiver is currently in another call",
-      });
+      return res.status(400).json({ success: false, message: "Receiver is currently in another call", });
     }
 
     // Generate call credentials
@@ -148,8 +166,11 @@ const initiateCall = async (req, res) => {
       channelName: `${Date.now()}`,
       uid: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
     };
+
+    // let roomId = creatRoomId()
     // Generate Agora token
     // const token = generateAgoraToken(credentials.channelName, credentials.uid);
+    // console.log("roomId: ", roomId);
 
     const data = {
       name: req.user.firstName || "Guest",
@@ -171,14 +192,8 @@ const initiateCall = async (req, res) => {
     // Get receiver's FCM token
     const receiver = await User.findById(receiverId);
     if (!receiver?.fcm) {
-      await Session.findByIdAndUpdate(session._id, {
-        status: "failed",
-        endTime: new Date(),
-      });
-      return res.status(400).json({
-        success: false,
-        message: "Receiver is not available for calls",
-      });
+      await Session.findByIdAndUpdate(session._id, { status: "failed", endTime: new Date(), });
+      return res.status(400).json({ success: false, message: "Receiver is not available for calls", });
     }
 
     // Send FCM notification
@@ -207,25 +222,10 @@ const initiateCall = async (req, res) => {
       },
     });
 
-    res.status(200).json({
-      success: true,
-      data: {
-        ...credentials,
-        callType,
-        sessionId: session._id,
-        receiver: {
-          name: receiver.firstName,
-          role: receiver.role,
-        },
-        token,
-      },
-    });
+    res.status(200).json({ success: true, data: { ...credentials, callType, sessionId: session._id, receiver: { name: receiver.firstName, role: receiver.role, }, token, }, });
   } catch (error) {
     console.error("Call initiation error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to initiate call",
-    });
+    res.status(500).json({ success: false, message: error.message || "Failed to initiate call", });
   }
 };
 
@@ -351,7 +351,6 @@ const handleMissedCall = async (req, res) => {
     if (client?.fcm) {
       const title = "Missed Call";
       const message = "The astrologer was unavailable";
-
       await notificationService.sendCallMessage(title, message, client.fcm, { type: "missed_call", sessionId: sessionId.toString(), });
     }
 
