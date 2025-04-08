@@ -269,7 +269,7 @@ const makeApiRequest = async (endpoint, params) => {
     if (error.response) {
       console.error("API Response Error:", error.response.data);
       throw new Error(
-        `API Error: ${error.response.status} - ${JSON.stringify(error.response.data) || "Unknown error"}`
+        `API Error: prokerla ${error.response.status} - ${JSON.stringify(error.response.data) || "Unknown error"}`
       );
     }
     throw new Error("Internal Server Error");

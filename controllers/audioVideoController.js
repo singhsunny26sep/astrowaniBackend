@@ -1,4 +1,4 @@
-const vcxroom = require("../enableX/vcxroom.js");
+const vcxroom = require("../enablex/vxroom");
 
 const getAllRomes = (req, res) => {
   try {

@@ -5,19 +5,25 @@ const User = require("../models/userModel");
 const Notification = require("../models/notificationModel");
 const CallHistory = require("../models/CallHistory");
 const Astrologer = require("../models/astrologerModel");
-
-const vcxroom = require("../enableX/vcxroom");
+const vcxroom = require("../enablex/vxroom");
 // const generateAgoraToken = require("./agoraToken");
 
-const creatToken = (body) => {
+const creatToken = async (body) => {
+
   try {
-    console.log(body);
-    vcxroom.getToken(body, async (status, data) => {
-      console.log(data, "token data");
-      return data;
+    return new Promise((resolve, reject) => {
+      vcxroom.getToken(body, (status, data) => {
+
+        if (status && data) {
+          resolve(data);
+        } else {
+          reject(new Error("Failed to get token"));
+        }
+      });
     });
   } catch (error) {
     console.error(error);
+    throw new Error("Error fetching token");
   }
 };
 
@@ -71,6 +77,7 @@ const creatRoomId = async () => {
   }
 };
 
+
 // Initiate a call
 const initiateCall = async (req, res) => {
   try {
@@ -87,6 +94,10 @@ const initiateCall = async (req, res) => {
     let astrologerId, clientId;
     let astrologer;
 
+    // const users = await Astrologer.find().sort({ createdAt: -1 })
+
+    let callerUser
+
     if (callerRole === "customer") {
       clientId = callerId;
       astrologerId = receiverId;
@@ -95,7 +106,8 @@ const initiateCall = async (req, res) => {
         userId: receiverId,
         isAvailable: true,
       });
-      console.log("astrologerId: ", astrologer);
+
+      callerUser = await User.findById(callerId)
 
       if (!astrologer) {
         return res.status(404).json({ success: false, message: "Astrologer not found or is currently unavailable", });
@@ -167,7 +179,7 @@ const initiateCall = async (req, res) => {
       uid: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
     };
 
-    // let roomId = creatRoomId()
+    let roomId = await creatRoomId()
     // Generate Agora token
     // const token = generateAgoraToken(credentials.channelName, credentials.uid);
     // console.log("roomId: ", roomId);
@@ -179,7 +191,13 @@ const initiateCall = async (req, res) => {
       roomId: roomId,
     };
 
-    const token = creatToken(data);
+    console.log(" ===================================== data ========================================= ");
+    console.log("data: ", data);
+
+
+    const token = await creatToken(data);
+    // console.log("token: ", token);
+
     // Create session record
     const session = await Session.create({
       sessionType: callType === "video" ? "videoCall" : "audioCall",
@@ -191,16 +209,16 @@ const initiateCall = async (req, res) => {
 
     // Get receiver's FCM token
     const receiver = await User.findById(receiverId);
-    if (!receiver?.fcm) {
+    /* if (!receiver?.fcm) {
       await Session.findByIdAndUpdate(session._id, { status: "failed", endTime: new Date(), });
       return res.status(400).json({ success: false, message: "Receiver is not available for calls", });
-    }
+    } */
 
     // Send FCM notification
     const title = `Incoming ${callType} Call`;
     const message = `${req.user.firstName || "Someone"} is calling you`;
 
-    await notificationService.sendCallMessage(title, message, receiver.fcm, {
+    /* await notificationService.sendCallMessage(title, message, receiver.fcm, {
       channelName: credentials.channelName,
       uid: credentials.uid,
       callType,
@@ -210,7 +228,13 @@ const initiateCall = async (req, res) => {
       callerRole: callerRole,
       roomId,
       receiverId,
-    });
+      token: JSON.stringify(token),
+      name: callerUser?.name?.toString(),
+      role: callerUser?.role?.toString(),
+      age: callerUser?.age?.toString(),
+      image: callerUser?.pic?.toString(),
+      distance: ""
+    }); */
 
     // Create notification record
     await Notification.create({
@@ -219,10 +243,11 @@ const initiateCall = async (req, res) => {
       message,
       metadata: {
         sessionId: session._id,
+        roomId
       },
     });
 
-    res.status(200).json({ success: true, data: { ...credentials, callType, sessionId: session._id, receiver: { name: receiver.firstName, role: receiver.role, }, token, }, });
+    res.status(200).json({ success: true, data: { ...credentials, callType, roomId, sessionId: session._id, receiver: { name: receiver.firstName, role: receiver.role, }, token, }, });
   } catch (error) {
     console.error("Call initiation error:", error);
     res.status(500).json({ success: false, message: error.message || "Failed to initiate call", });
@@ -230,7 +255,7 @@ const initiateCall = async (req, res) => {
 };
 
 // End a call
-const endCall = async (req, res) => {
+/* const endCall = async (req, res) => {
   try {
     const { sessionId, duration, rating, feedback } = req.body;
 
@@ -249,7 +274,7 @@ const endCall = async (req, res) => {
     const astrologer = await Astrologer.findOne({
       userId: session.astrologerId,
     });
-    console.log(astrologer.callChargePerMinute);
+    // console.log(astrologer.callChargePerMinute);
 
     // Calculate call charges
     const callDuration = duration || Math.ceil((Date.now() - session.startTime) / 60000); // in minutes
@@ -283,9 +308,7 @@ const endCall = async (req, res) => {
     await astrologer.save()
 
     // Notify users about call completion
-    const users = await User.find({
-      _id: { $in: [session.astrologerId, session.clientId] },
-    });
+    const users = await User.find({ _id: { $in: [session.astrologerId, session.clientId] }, });
 
     for (const user of users) {
       if (user.fcm) {
@@ -305,7 +328,210 @@ const endCall = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || "Failed to end call", });
   }
+}; */
+
+/* const endCall = async (req, res) => {
+  try {
+    const { sessionId, duration, rating, feedback } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: "Session ID is required" });
+    }
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
+
+    if (session.status !== "ongoing") {
+      return res.status(400).json({ success: false, message: "Call is not ongoing" });
+    }
+
+    const callDuration = duration || Math.ceil((Date.now() - session.startTime) / 60000); // in minutes
+
+    const planSetting = await Plan.findOne();
+    if (!planSetting) {
+      return res.status(404).json({ success: false, message: "Plan settings not found" });
+    }
+
+    const callPlan = planSetting.voiceCall;
+    const callerCharge = callDuration * callPlan.makeCallPoints;
+    const receiverCharge = callDuration * callPlan.receiveCallPoints;
+    const totalCharge = callerCharge + receiverCharge;
+
+    const sender = await User.findById(session.senderId);
+    const receiver = await User.findById(session.receiverId);
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ success: false, message: "One or both users not found" });
+    }
+
+    // Check balance
+    if (sender.points < callerCharge || receiver.points < receiverCharge) {
+      return res.status(400).json({ success: false, message: "Insufficient balance for deduction" });
+    }
+
+    sender.points -= callerCharge;
+    receiver.points -= receiverCharge;
+
+    await sender.save();
+    await receiver.save();
+
+    session.status = "completed";
+    session.endTime = new Date();
+    session.duration = callDuration;
+    session.totalCharge = totalCharge;
+    if (rating) session.rating = rating;
+    if (feedback) session.feedback = feedback;
+    await session.save();
+
+    await CallHistory.create({
+      senderId: session.senderId,
+      reciverId: session.receiverId,
+      callStartTime: session.startTime,
+      callEndTime: session.endTime,
+      callDuration,
+      callStatus: "completed",
+      rating,
+      comments: feedback,
+    });
+
+    // Send notification
+    const users = await User.find({ _id: { $in: [session.senderId, session.receiverId] } });
+    for (const user of users) {
+      if (user.FCM) {
+        await notificationService.sendCallMessage(
+          "Call Ended",
+          `Call duration: ${callDuration} minutes. Charges deducted.`,
+          user.FCM,
+          {
+            type: "call_ended",
+            sessionId: session._id.toString(),
+            duration: callDuration.toString(),
+            totalCharge: totalCharge.toString(),
+          }
+        );
+      }
+    }
+
+    // OPTIONAL: End room on EnableX or other provider
+    // Add user_ref if needed
+    try {
+      await endVideoRoom(session.videoRoomId, {
+        user_ref: session.senderId.toString() // or receiverId depending on logic
+      });
+    } catch (apiError) {
+      console.log("Failed to end video room:", apiError?.response?.data || apiError.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        duration: callDuration,
+        totalCharge,
+        sessionId: session._id,
+        callerBalance: sender.points,
+        receiverBalance: receiver.points,
+      },
+    });
+  } catch (error) {
+    console.log("Error on end call:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to end call" });
+  }
+}; */
+
+const endCall = async (req, res) => {
+  try {
+    const { sessionId, duration, rating, feedback, roomId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: "Session ID is required" });
+    }
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
+
+    if (session.status !== "ongoing") {
+      return res.status(400).json({ success: false, message: "Call is not ongoing" });
+    }
+
+    // Fetch astrologer info
+    const astrologer = await Astrologer.findOne({ userId: session.astrologerId });
+    if (!astrologer) {
+      return res.status(404).json({ success: false, message: "Astrologer not found" });
+    }
+
+    // Calculate call duration and charges
+    const callDuration = duration || Math.ceil((Date.now() - session.startTime) / 60000); // in minutes
+    const totalCharge = callDuration * astrologer.callChargePerMinute;
+
+    // Fetch client user to deduct balance
+    const client = await User.findById(session.clientId);
+    if (!client) {
+      return res.status(404).json({ success: false, message: "Client not found" });
+    }
+
+    // Check for sufficient balance
+    if (client.wallet < totalCharge) {
+      return res.status(400).json({ success: false, message: "Insufficient balance" });
+    }
+
+    // Deduct from client wallet
+    client.wallet -= totalCharge;
+    await client.save();
+
+    // Update astrologer call count
+    astrologer.callCount += 1;
+    await astrologer.save();
+
+    // Update session
+    session.status = "completed";
+    session.endTime = new Date();
+    session.duration = callDuration;
+    session.totalCharge = totalCharge;
+    if (rating) session.rating = rating;
+    if (feedback) session.feedback = feedback;
+    await session.save();
+
+    // Save call history
+    await CallHistory.create({
+      astrologerId: session.astrologerId,
+      clientId: session.clientId,
+      callStartTime: session.startTime,
+      callEndTime: session.endTime,
+      callDuration,
+      callStatus: "completed",
+      rating,
+      comments: feedback,
+    });
+
+    // Send FCM notifications
+    const users = await User.find({ _id: { $in: [session.astrologerId, session.clientId] } });
+    for (const user of users) {
+      if (user.fcm) {
+        const title = "Call Ended";
+        const message = `Call duration: ${callDuration} minutes. Charges applied.`;
+
+        await notificationService.sendCallMessage(title, message, user.fcm, {
+          type: "call_ended",
+          sessionId: sessionId.toString(),
+          duration: callDuration.toString(),
+          totalCharge: totalCharge.toString(),
+        });
+      }
+    }
+
+    return res.status(200).json({ success: true, data: { duration: callDuration, totalCharge, sessionId: session._id, clientBalance: client.wallet, }, });
+  } catch (error) {
+    console.error("Error in endCall:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to end call" });
+  }
 };
+
+
+
 // Handle missed call
 const handleMissedCall = async (req, res) => {
   try {
@@ -361,8 +587,9 @@ const handleMissedCall = async (req, res) => {
 };
 
 const acceptCall = async (req, res) => {
+
+  const { sessionId, receiverId, roomId } = req.body;
   try {
-    const { sessionId, receiverId, roomId } = req.body;
 
     // Fetch session details
     const session = await Session.findById(sessionId);
@@ -370,24 +597,27 @@ const acceptCall = async (req, res) => {
       return res.status(404).json({ success: false, message: "Session not found", });
     }
 
+    console.log("session: ", session);
+
+    // Generate token for User 2
+    /* const data = {
+      name: req.user.firstName || "Guest",
+      role: "participant",
+      user_ref: receiverId?.toString(),
+      roomId: roomId,
+    }; */
     // Generate token for User 2
     const data = {
       name: req.user.firstName || "Guest",
-      role: "participant",
-      user_ref: receiverId.toString(),
+      role: "moderator",
+      user_ref: receiverId?.toString(),
       roomId: roomId,
     };
 
-    const token = creatToken(data);
+    const token = await creatToken(data);
+    // console.log("token: ", token);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        roomId,
-        sessionId: session._id,
-        token,
-      },
-    });
+    res.status(200).json({ success: true, data: { roomId, sessionId: session._id, token, }, });
   } catch (error) {
     console.error("Call acceptance error:", error);
     res.status(500).json({ success: false, message: error.message || "Failed to accept call", });
