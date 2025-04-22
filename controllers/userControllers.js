@@ -685,3 +685,24 @@ exports.verifyOTPAPI = async (req, res) => {
     return res.status(500).json({ error: error, success: false, msg: error.message })
   }
 }
+
+
+exports.getUserDetails = async (req, res) => {
+  const userId = req.params.id
+
+  console.log(" ====================== getUserDetails ====================");
+  console.log("userId: ", userId);
+
+
+  try {
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: 'User not found' })
+    }
+    return res.status(200).json({ success: true, msg: 'User details', data: user })
+  } catch (error) {
+    console.log("error on getUserDetails: ", error);
+    return res.status(500).json({ error: error, success: false, msg: error.message })
+  }
+}

@@ -1,7 +1,7 @@
 // userRoutes.js
 const express = require("express");
 const router = express.Router();
-const { requestOTP, register, login, verifyOTP, resendOTP, getProfile, updateProfile, forgotPassword, resetPassword, updatePassword, getAllUser, requestAstroOTP, registerAstrologer, updateAstrologerProfile, getUserById, requestOtp, verifyOTPAPI, } = require("../controllers/userControllers");
+const { requestOTP, register, login, verifyOTP, resendOTP, getProfile, updateProfile, forgotPassword, resetPassword, updatePassword, getAllUser, requestAstroOTP, registerAstrologer, updateAstrologerProfile, getUserById, requestOtp, verifyOTPAPI, getUserDetails, } = require("../controllers/userControllers");
 const { protect } = require("../middleware/authMiddleware");
 
 router.post("/sign-in", requestOTP);
@@ -22,6 +22,8 @@ router.put("/update-password", protect, updatePassword);
 
 router.post('/request-otp', requestOtp)
 router.post('/otp-verify', verifyOTPAPI)
+
+router.get('/user/details/:id', /* protect, */ getUserDetails)
 
 // Route to get user details by ID
 router.get("/:userId", getUserById);
