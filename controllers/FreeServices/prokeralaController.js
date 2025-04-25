@@ -253,8 +253,8 @@ const BASE_URL = process.env.PROKERALA_API_BASE_URL;
 const makeApiRequest = async (endpoint, params) => {
   try {
     const token = await getAccessToken();
-    console.log("Access Token:", token);
-    console.log("Request Params:", params);
+    // console.log("Access Token:", token);
+    // console.log("Request Params:", params);
 
     const response = await axios.get(`${BASE_URL}${endpoint}`, {
       params,
@@ -332,15 +332,9 @@ exports.getTodaysPanchang = async (req, res) => {
 
   try {
     // Make the API request
-    await handleApiRequest(req, res, () =>
-      makeApiRequest("/astrology/panchang/advanced", params)
-    );
+    await handleApiRequest(req, res, () => makeApiRequest("/astrology/panchang/advanced", params));
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching Panchang",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Error fetching Panchang", error: error.message, });
   }
 };
 
@@ -349,9 +343,7 @@ exports.getJanamKundali = async (req, res) => {
   const { latitude, longitude, ayanamsa, language } = req.query;
 
   if (!latitude || !longitude || !ayanamsa) {
-    return res
-      .status(400)
-      .json({ message: "Latitude, longitude, and ayanamsa are required" });
+    return res.status(400).json({ message: "Latitude, longitude, and ayanamsa are required" });
   }
 
   const params = {
@@ -361,9 +353,7 @@ exports.getJanamKundali = async (req, res) => {
     la: language,
   };
 
-  await handleApiRequest(req, res, () =>
-    makeApiRequest("/astrology/kundli", params)
-  );
+  await handleApiRequest(req, res, () => makeApiRequest("/astrology/kundli", params));
 };
 
 exports.getKundaliMatch = async (req, res) => {
@@ -378,19 +368,17 @@ exports.getKundaliMatch = async (req, res) => {
   //   la: "en",
   // };
 
-  console.log("req.boyd: ", req.body);
-
   const params = {
     ayanamsa: 1,
+    boy_name: maleDetails?.name || "", // optional
     boy_coordinates: `${maleDetails?.location?.latitude},${maleDetails?.location?.longitude}`,
     boy_dob: `${maleDetails?.dob}`,
+    girl_name: femaleDetails?.name || "", // optional
     girl_coordinates: `${femaleDetails?.location?.latitude},${femaleDetails?.location?.longitude}`,
     girl_dob: `${femaleDetails?.dob}`,
     la: "en",
   };
-  await handleApiRequest(req, res, () =>
-    makeApiRequest("/astrology/kundli-matching", params)
-  );
+  await handleApiRequest(req, res, () => makeApiRequest("/astrology/kundli-matching", params));
 };
 
 // exports.getShubhMuhurat = async (req, res) => {
@@ -430,9 +418,7 @@ exports.getChoghadiya = async (req, res) => {
   const { date, location } = req.body;
 
   if (!location || !location.latitude || !location.longitude || !date) {
-    return res.status(400).json({
-      message: "Location (latitude, longitude) and date are required",
-    });
+    return res.status(400).json({ message: "Location (latitude, longitude) and date are required", });
   }
 
   const params = {
@@ -453,9 +439,7 @@ exports.getHoraTiming = async (req, res) => {
   const { date, location } = req.body;
 
   if (!location || !location.latitude || !location.longitude || !date) {
-    return res.status(400).json({
-      message: "Location (latitude, longitude) and date are required",
-    });
+    return res.status(400).json({ message: "Location (latitude, longitude) and date are required", });
   }
 
   const params = {
@@ -476,9 +460,7 @@ exports.getGowriNallaNeram = async (req, res) => {
   const { date, location } = req.body;
 
   if (!location || !location.latitude || !location.longitude || !date) {
-    return res.status(400).json({
-      message: "Location (latitude, longitude) and date are required",
-    });
+    return res.status(400).json({ message: "Location (latitude, longitude) and date are required", });
   }
 
   // Format the datetime to ISO 8601
@@ -491,10 +473,7 @@ exports.getGowriNallaNeram = async (req, res) => {
   };
 
   await handleApiRequest(req, res, async () => {
-    const gowriNallaNeram = await makeApiRequest(
-      "/astrology/gowri-nalla-neram",
-      params
-    );
+    const gowriNallaNeram = await makeApiRequest("/astrology/gowri-nalla-neram", params);
     return { gowriNallaNeram };
   });
 };
@@ -504,9 +483,7 @@ exports.getRahuKaal = async (req, res) => {
   const { date, location } = req.body;
 
   if (!location || !location.latitude || !location.longitude || !date) {
-    return res.status(400).json({
-      message: "Location (latitude, longitude) and date are required",
-    });
+    return res.status(400).json({ message: "Location (latitude, longitude) and date are required", });
   }
 
   const params = {
@@ -517,19 +494,14 @@ exports.getRahuKaal = async (req, res) => {
   };
 
   await handleApiRequest(req, res, async () => {
-    const rahuKaal = await makeApiRequest(
-      "/astrology/inauspicious-period",
-      params
-    );
+    const rahuKaal = await makeApiRequest("/astrology/inauspicious-period", params);
     return { rahuKaal };
   });
 };
 
 exports.getVratUpvaas = async (req, res) => {
   const { year, month } = req.query;
-  await handleApiRequest(req, res, () =>
-    makeApiRequest("/astrology/vrat-upvaas", { year, month })
-  );
+  await handleApiRequest(req, res, () => makeApiRequest("/astrology/vrat-upvaas", { year, month }));
 };
 
 exports.getDailyHoroscope = async (req, res) => {
@@ -547,8 +519,6 @@ exports.getDailyHoroscope = async (req, res) => {
     sign: sign.toLowerCase(),
   };
 
-  await handleApiRequest(req, res, () =>
-    makeApiRequest("/horoscope/daily", params)
-  );
+  await handleApiRequest(req, res, () => makeApiRequest("/horoscope/daily", params));
   // console.log("========================= END =================================");
 };
