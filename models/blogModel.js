@@ -42,17 +42,17 @@ const { Schema } = mongoose;
 const BlogSchema = new Schema(
   {
     english: {
-      title: { type: String, required: true },
+      title: { type: String },
       slug: { type: String },
-      content: { type: String, required: true },
+      content: { type: String },
       excerpt: { type: String },
       metaDescription: { type: String },
       keywords: [{ type: String }],
     },
     hindi: {
-      title: { type: String, required: true },
+      title: { type: String },
       slug: { type: String },
-      content: { type: String, required: true },
+      content: { type: String },
       excerpt: { type: String },
       metaDescription: { type: String },
       keywords: [{ type: String }],
