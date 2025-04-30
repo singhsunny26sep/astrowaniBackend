@@ -248,21 +248,16 @@ const Category = require("../models/categoryModel");
 // Create a new blog post
 const createBlog = async (req, res) => {
   try {
-    const {
-      english,
-      hindi,
-      thumbnail,
-      categoryId,
-    } = req.body;
+    const { english, hindi, thumbnail, categoryId, } = req.body;
 
     // Generate slug from English title
-    let slug = slugify(english.title);
+    let slug = slugify(english?.title);
 
     // Check for duplicate slug
     let existingBlog = await Blog.findOne({ slug });
     let count = 1;
     while (existingBlog) {
-      slug = `${slugify(english.title)}-${count}`;
+      slug = `${slugify(english?.title)}-${count}`;
       existingBlog = await Blog.findOne({ slug });
       count += 1;
     }
@@ -273,16 +268,7 @@ const createBlog = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    const newBlog = new Blog({
-      english: {
-        ...english,
-        slug,
-      },
-      hindi,
-      slug,
-      thumbnail,
-      category: categoryId,
-    });
+    const newBlog = new Blog({ english: { ...english, slug, }, hindi, slug, thumbnail, category: categoryId, });
 
     await newBlog.save();
     res.status(201).json(newBlog);
@@ -297,22 +283,11 @@ const getAllBlogs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // Default limit
     const page = parseInt(req.query.page) || 1;   // Default page
 
-    const blogs = await Blog.find()
-      .populate("category")
-      .limit(limit)
-      .skip((page - 1) * limit);
+    const blogs = await Blog.find().populate("category").limit(limit).skip((page - 1) * limit);
 
     const totalBlogs = await Blog.countDocuments();
 
-    res.status(200).json({
-      success: true,
-      data: blogs,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalBlogs / limit),
-        totalBlogs,
-      },
-    });
+    res.status(200).json({ success: true, data: blogs, pagination: { currentPage: page, totalPages: Math.ceil(totalBlogs / limit), totalBlogs, }, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

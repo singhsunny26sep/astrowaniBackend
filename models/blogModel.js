@@ -64,12 +64,11 @@ const BlogSchema = new Schema(
       ref: "Category",
       required: true,
     },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 // Pre-save hook to generate slugs
-BlogSchema.pre("save", function(next) {
+BlogSchema.pre("save", function (next) {
   if (this.english && !this.english.slug) {
     this.english.slug = slugify(this.english.title, { lower: true });
   }
