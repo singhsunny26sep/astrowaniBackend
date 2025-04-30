@@ -230,16 +230,6 @@
 // };
 
 
-// module.exports = {
-//   createBlog,
-//   getAllBlogs,
-//   getBlogBySlug,
-//   updateBlog,
-//   deleteBlog,
-//   getBlogsByCategory,
-//   getBlogById,
-//   getBlogsByCategoryName
-// };
 //=================================================================
 const { slugify } = require("../helpers/slugify");
 const Blog = require("../models/blogModel");

@@ -58,11 +58,10 @@ const BlogSchema = new Schema(
       keywords: [{ type: String }],
     },
     slug: { type: String },
-    thumbnail: { type: String, required: true },
+    thumbnail: { type: String },
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
     },
   }, { timestamps: true }
 );
