@@ -4,6 +4,7 @@ const Session = require('../models/sessionModel');
 const Chat = require('../models/chatModel');
 const CallHistory = require("../models/CallHistory");
 const { default: mongoose } = require("mongoose");
+const moment = require('moment');
 
 
 const getTodayDateRange = () => {
@@ -46,24 +47,46 @@ exports.getAstrologers = async (req, res, next) => {
 // @route   GET /api/v1/astrologers/:id
 // @access  Public
 exports.getAstrologer = async (req, res, next) => {
-  console.log("DETAILS ASTROLOGER");
+  // console.log("DETAILS ASTROLOGER");
+  const now = moment();
+  const startOfMonth = now.clone().startOf('month').toDate();
+  const endOfMonth = now.clone().endOf('month').toDate();
 
   try {
-    const astrologer = await Astrologer.findById(req.params.id).populate(
-      "userId",
-      "specialties name"
-    );
+    const astrologer = await Astrologer.findById(req.params.id).populate("userId", "specialties name");
+    // const callCount = await CallHistory.countDocuments({ astrologerId: req.params.id });
+    const allCalls = await CallHistory.find({ astrologerId: req.params.id });
+
+    const user = await User.findById(astrologer.userId).select("-password -__v");
+
+    const monthlyCalls = await CallHistory.find({
+      astrologerId: req.params.id,
+      callStartTime: { $gte: startOfMonth, $lte: endOfMonth },
+    });
+
+    let timeDay = 0;
+    let timeNight = 0;
+
+    allCalls.forEach((call) => {
+      const startHour = moment(call.callStartTime).hour();
+      const duration = call.callDuration || 0;
+
+      if (startHour >= 6 && startHour < 18) {
+        timeDay += duration;
+      } else {
+        timeNight += duration;
+      }
+    });
 
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: `Astrologer not found with id of ${req.params.id}`,
-      });
+      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
     }
 
-    res.status(200).json({ success: true, data: astrologer });
+    res.status(200).json({ success: true, data: astrologer, callCount: allCalls.length, monthlyCallCount: monthlyCalls.length, timeDay, timeNight, packageUsed: user?.activePlan || 'Not implemented' });
   } catch (error) {
+    console.log("error on getAstrologer:", error);
+
     res.status(500).json({ success: false, error: "Server Error" });
   }
 };
