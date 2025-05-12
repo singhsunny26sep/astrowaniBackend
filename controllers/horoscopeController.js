@@ -3,9 +3,9 @@ const Horoscope = require('../models/horoscopeModel');
 // Create a horoscope
 exports.createHoroscope = async (req, res) => {
   try {
-    const { zodiacSign, type, date, description, luckyNumber, luckyColor } = req.body;
+    const { zodiacSign, type, dateRange, description, luckyNumber, luckyColor, Image } = req.body;
     const horoscope = new Horoscope({
-      zodiacSign, type, date, description, luckyNumber, luckyColor, createdBy: req.astrologerId, // Assuming astrologer's ID is retrieved from middleware
+      zodiacSign, type, dateRange, description, luckyNumber, luckyColor, createdBy: req.astrologerId, Image // Assuming astrologer's ID is retrieved from middleware
     });
     const savedHoroscope = await horoscope.save();
     res.status(201).json(savedHoroscope);
@@ -16,10 +16,10 @@ exports.createHoroscope = async (req, res) => {
 
 // Get all horoscopes
 exports.getAllHoroscopes = async (req, res) => {
-  console.log("Get all horoscopes");
+  // console.log("Get all horoscopes");
 
   try {
-    const horoscopes = await Horoscope.find().populate('createdBy', 'name'); // Optionally populate astrologer's info
+    const horoscopes = await Horoscope.find().sort({ createdAt: -1 }) //.populate('createdBy', 'name'); // Optionally populate astrologer's info
     res.status(200).json(horoscopes);
   } catch (error) {
     res.status(500).json({ error: error.message });

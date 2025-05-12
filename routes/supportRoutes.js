@@ -1,14 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const {
-  createSupportRequest,
-  getSupportRequests,
-  deleteSupportRequest,
-} = require("../controllers/SupportController");
+const { createSupportRequest, getSupportRequests, deleteSupportRequest, } = require("../controllers/SupportController");
 const { protect } = require("../middleware/authMiddleware");
 
 // POST: Create a new support request
-router.post("/create-support", protect,createSupportRequest);
+router.post("/create-support", protect, createSupportRequest);
 
 // GET: Get all support requests
 router.get("/get-all-supports", getSupportRequests);
