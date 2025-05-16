@@ -19,7 +19,7 @@ exports.protect = async (req, res, next) => {
     // console.log(token);
 
     const decoded = jwt.verify(token, config.JWT_SECRET);
-    // console.log(decoded);
+    // console.log("decoded: ", decoded);
     // console.log("Token issued at:", new Date(decoded.iat * 1000).toISOString());
     // console.log(
     //   "Token expires at:",

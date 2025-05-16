@@ -7,6 +7,7 @@ exports.createSupportRequest = async (req, res) => {
 
     // Create a new support request
     const supportRequest = new Support({
+      user: req?.user?._id,
       name,
       email,
       issueType,
@@ -15,9 +16,11 @@ exports.createSupportRequest = async (req, res) => {
     });
 
     await supportRequest.save();
+    // console.log("supportRequest: ", supportRequest);
 
-    res.status(201).json({ success: true, data: supportRequest });
+    res.status(201).json({ success: true, data: supportRequest, message: "Support request created successfully" });
   } catch (error) {
+    console.log("error on createSupoorRequest: ", error);
     res.status(500).json({ success: false, message: "Server error", error });
   }
 };

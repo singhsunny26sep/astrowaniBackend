@@ -246,26 +246,17 @@ exports.toggleOnlineAstrologerAvailability = async (req, res, next) => {
     const astrologer = await Astrologer.findOne({ userId });
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: "Astrologer not found",
-      });
+      return res.status(404).json({ success: false, error: "Astrologer not found", });
     }
 
     // Toggle the availability status
     astrologer.isAvailable = !astrologer.isAvailable;
     await astrologer.save();
 
-    return res.status(200).json({
-      success: true,
-      data: astrologer,
-    });
+    return res.status(200).json({ success: true, data: astrologer, });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
-      success: false,
-      error: "Server Error",
-    });
+    return res.status(500).json({ success: false, error: "Server Error", message: "Failed to go live!" });
   }
 };
 

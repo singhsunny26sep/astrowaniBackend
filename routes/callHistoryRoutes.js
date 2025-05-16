@@ -1,6 +1,6 @@
 const express = require("express");
-const { createCallHistory, getCallHistory, updateCallHistory, deleteCallHistory, getCallHistoryByAstroId, } = require("../controllers/callHistoryController");
-const { protect } = require("../middleware/authMiddleware");
+const { createCallHistory, getCallHistory, updateCallHistory, deleteCallHistory, getCallHistoryByAstroId, getCallHistoryTOekn, } = require("../controllers/callHistoryController");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const { initiateCall, endCall, handleMissedCall, acceptCall, } = require("../helpers/callHandlers");
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.post("/missed", protect, handleMissedCall);
 
 router.use(protect);
 
+router.get("/callHistoryByAstroId", protect, authorize("astrologer"), getCallHistoryTOekn)
 router.get("/callHistoryByAstroId/:id", getCallHistoryByAstroId)
 
 router.route("/call-history").post(createCallHistory) // POST: Create call history

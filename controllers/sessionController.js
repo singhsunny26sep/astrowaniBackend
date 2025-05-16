@@ -467,10 +467,7 @@ exports.updateSession = async (req, res, next) => {
 
     const updatedSession = await session.save();
 
-    res.status(200).json({
-      success: true,
-      data: updatedSession,
-    });
+    res.status(200).json({ success: true, data: updatedSession, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

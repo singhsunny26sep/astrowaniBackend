@@ -88,9 +88,25 @@ exports.getCallHistoryByAstroId = async (req, res) => {
 
     const history = await CallHistory.find(filter)
       .populate("astrologerId", "firstName lastName email") // Populate astrologer details
-      .populate("clientId", "firstName lastName email") // Populate client details
+      .populate("clientId", "firstName lastName email profilePic") // Populate client details
       .skip(Number(offset))
       .limit(Number(limit))
+      .sort({ callStartTime: -1 });
+
+    res.status(200).json({ success: true, count: history.length, data: history, });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+exports.getCallHistoryTOekn = async (req, res) => {
+
+  const astrologerId = req.user._id
+  try {
+    const filter = { astrologerId };
+
+    const history = await CallHistory.find(filter)
+      .populate("astrologerId", "firstName lastName email") // Populate astrologer details
+      .populate("clientId", "firstName lastName email") // Populate client details
       .sort({ callStartTime: -1 });
 
     res.status(200).json({ success: true, count: history.length, data: history, });

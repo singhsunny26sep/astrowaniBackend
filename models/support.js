@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const supportSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     name: {
       type: String,
       required: true,
@@ -21,6 +25,7 @@ const supportSchema = new mongoose.Schema(
         "Refund Request",
         "Feedback",
         "Other",
+        "General Inquiry"
       ],
       default: "General Inquiry",
     },
