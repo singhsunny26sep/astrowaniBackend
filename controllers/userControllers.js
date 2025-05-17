@@ -124,11 +124,9 @@ exports.requestOTP = async (req, res) => {
       </div>
     `;
     await sendEmail(email, "Verify Your Account", otpHtml);
+    console.log("otp: ", otp);
 
-    res.status(201).json({
-      success: true,
-      message: "OTP has been sent to your email. Please check your inbox.",
-    });
+    res.status(201).json({ success: true, message: "OTP has been sent to your email. Please check your inbox.", });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
@@ -216,16 +214,11 @@ exports.verifyOTP = async (req, res) => {
     //   expiresIn: "10m",
     // });
 
-    const token = user.getSignedJwtToken({
-      expiresIn: "30d",
-      secret: process.env.JWT_SECRET,
-    });
+    const token = user.getSignedJwtToken({ expiresIn: "30d", secret: process.env.JWT_SECRET, });
     user.isVerified = true;
     user.otp = undefined;
     await user.save();
-    res
-      .status(200)
-      .json({ success: true, message: "Account verified successfully", token });
+    res.status(200).json({ success: true, message: "Account verified successfully", token });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
@@ -236,9 +229,7 @@ exports.resendOTP = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     const otp = generateOTP();
     user.otp = {
@@ -246,14 +237,8 @@ exports.resendOTP = async (req, res) => {
       expiresAt: Date.now() + 10 * 60 * 1000,
     };
     await user.save();
-    await sendEmail(
-      email,
-      "New OTP for Account Verification",
-      `Your new OTP is: ${otp}`
-    );
-    res
-      .status(200)
-      .json({ success: true, message: "New OTP sent to your email" });
+    await sendEmail(email, "New OTP for Account Verification", `Your new OTP is: ${otp}`);
+    res.status(200).json({ success: true, message: "New OTP sent to your email" });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

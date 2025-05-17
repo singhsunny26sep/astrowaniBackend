@@ -242,6 +242,9 @@ exports.toggleOnlineAstrologerAvailability = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
+    console.log("userid: ", userId);
+
+
     // Fetch the astrologer document using the associated userId
     const astrologer = await Astrologer.findOne({ userId });
 
@@ -459,20 +462,9 @@ exports.getAstrologerTodayStats = async (req, res) => {
 
     const totalCallUsers = callUsersAggregation.length;
 
-    res.status(200).json({
-      success: true,
-      data: {
-        totalEarnings,
-        totalCallsCount: totalCallUsers,
-        chatsCount: chatsTodayCount,
-      },
-    });
+    res.status(200).json({ success: true, data: { totalEarnings, totalCallsCount: totalCallUsers, chatsCount: chatsTodayCount, }, });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message, });
   }
 };
 
@@ -553,16 +545,10 @@ exports.getAstrologerCharges = async (req, res) => {
 // @access  Public
 exports.getAstrologerUsingToken = async (req, res, next) => {
   try {
-    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate(
-      "userId",
-      "firstName lastName email phoneNumber gender "
-    );
+    const astrologer = await Astrologer.findOne({ userId: req.user._id }).populate("userId", "firstName lastName email phoneNumber gender ");
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: `Astrologer not found with id of ${req.params.id}`,
-      });
+      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
     }
 
     res.status(200).json({ success: true, data: astrologer });

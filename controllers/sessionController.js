@@ -370,13 +370,7 @@ const mongoose = require('mongoose');
 // @route   POST /api/sessions
 // @access  Private
 exports.createSession = async (req, res, next) => {
-  const {
-    sessionType,
-    astrologerId,
-    clientId,
-    startTime,
-    chargePerMinute,
-  } = req.body;
+  const { sessionType, astrologerId, clientId, startTime, chargePerMinute, } = req.body;
 
   // const sessionType = "chat"
   // const astrologerId = "6728a2ab0729a58cf740fd74"
@@ -384,17 +378,7 @@ exports.createSession = async (req, res, next) => {
   // const startTime = new Date()
   // const chargePerMinute = 1
   try {
-    const newSession = await Session.create({
-      sessionType,
-      astrologerId,
-      clientId,
-      startTime,
-      chargePerMinute,
-      status: "ongoing",
-    });
-
-    // console.log("newSession: ", newSession);
-
+    const newSession = await Session.create({ sessionType, astrologerId, clientId, startTime, chargePerMinute, status: "ongoing", });
 
     res.status(201).json({ success: true, data: newSession, });
   } catch (error) {
@@ -529,15 +513,9 @@ exports.getConnectedClients = async (req, res) => {
       }
     ]);
 
-    res.status(200).json({
-      success: true,
-      data: sessionsWithClientDetails,
-    });
+    res.status(200).json({ success: true, data: sessionsWithClientDetails, });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message, });
   }
 }
 

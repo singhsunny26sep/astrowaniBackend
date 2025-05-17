@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const sessionController = require('../controllers/sessionController');
-const {protect ,authorize} = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Session management routes
 // Get connected customers for an astrologer

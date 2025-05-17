@@ -55,7 +55,7 @@ exports.getCallHistory = async (req, res, next) => {
   try {
     const { limit = 10, offset = 0 } = req.query;
     const filter = {};
-    console.log("ROLE :", req.user.role);
+    // console.log("ROLE :", req.user.role);
 
     // Check user role and set filter accordingly
     if (req.user.role === "astrologer") {
@@ -68,14 +68,17 @@ exports.getCallHistory = async (req, res, next) => {
 
     // Fetch and populate call history
     const history = await CallHistory.find(filter)
-      .populate("astrologerId", "firstName lastName email") // Populate astrologer details
-      .populate("clientId", "firstName lastName email") // Populate client details
+      .populate("astrologerId", "firstName lastName email profilePic") // Populate astrologer details
+      .populate("clientId", "firstName lastName email profilePic") // Populate client details
       .skip(Number(offset))
       .limit(Number(limit))
       .sort({ callStartTime: -1 });
+    // console.log("history: ", history);
 
     res.status(200).json({ success: true, count: history.length, data: history, });
   } catch (error) {
+    console.log("error on getCallHistory: ", error);
+
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -106,7 +109,7 @@ exports.getCallHistoryTOekn = async (req, res) => {
 
     const history = await CallHistory.find(filter)
       .populate("astrologerId", "firstName lastName email") // Populate astrologer details
-      .populate("clientId", "firstName lastName email") // Populate client details
+      .populate("clientId", "firstName lastName email profilePic") // Populate client details
       .sort({ callStartTime: -1 });
 
     res.status(200).json({ success: true, count: history.length, data: history, });

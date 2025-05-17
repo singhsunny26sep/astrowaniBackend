@@ -6,7 +6,7 @@ const { protect } = require("../middleware/authMiddleware");
 
 router.post("/sign-in", requestOTP);
 router.post("/astro-sign-in", requestAstroOTP);
-router.post("/register", register);
+router.post("/register", register); // admin
 router.post("/register-astrologer", registerAstrologer);
 router.post("/login", login);
 router.post("/verify-otp", verifyOTP);

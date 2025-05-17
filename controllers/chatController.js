@@ -137,9 +137,7 @@ exports.getAllChatHistory = async (req, res) => {
 
   try {
     // Find all chats where the astrologer is either the sender or receiver
-    const chats = await Chat.find({
-      $or: [{ sender: astrologerId }, { receiver: astrologerId }],
-    })
+    const chats = await Chat.find({ $or: [{ sender: astrologerId }, { receiver: astrologerId }], })
       .populate("sender", "name email firstName lastName profilePic") // Populate sender details
       .populate("receiver", "name email  firstName lastName profilePic") // Populate receiver details
       .exec();
@@ -147,10 +145,7 @@ exports.getAllChatHistory = async (req, res) => {
     // Use a Map to extract unique users chatting with the astrologer
     const uniqueUsers = Array.from(
       chats.reduce((map, chat) => {
-        const otherUser =
-          chat.sender._id.toString() === astrologerId.toString()
-            ? chat.receiver
-            : chat.sender; // Identify the other party in the chat
+        const otherUser = chat.sender._id.toString() === astrologerId.toString() ? chat.receiver : chat.sender; // Identify the other party in the chat
         if (!map.has(otherUser._id.toString())) {
           map.set(otherUser._id.toString(), otherUser); // Add unique user to the Map
         }
@@ -158,11 +153,7 @@ exports.getAllChatHistory = async (req, res) => {
       }, new Map()).values()
     );
 
-    return res.status(200).json({
-      success: true,
-      message: "Unique users chatting with astrologer retrieved successfully.",
-      data: uniqueUsers,
-    });
+    return res.status(200).json({ success: true, message: "Unique users chatting with astrologer retrieved successfully.", data: uniqueUsers, });
   } catch (error) {
     console.error("Error on getAllChatHistory:", error);
     res.status(500).json({ success: false, message: error.message, error });
@@ -213,10 +204,7 @@ exports.createChatMessage = async (req, res, next) => {
     // Fetch the receiver user by ID
     const user = await userModel.findById(receiver);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Receiver user not found",
-      });
+      return res.status(404).json({ success: false, message: "Receiver user not found", });
     }
     const newChat = await Chat.create({
       sessionId,
@@ -225,10 +213,7 @@ exports.createChatMessage = async (req, res, next) => {
       message,
     });
 
-    res.status(201).json({
-      success: true,
-      data: newChat,
-    });
+    res.status(201).json({ success: true, data: newChat, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

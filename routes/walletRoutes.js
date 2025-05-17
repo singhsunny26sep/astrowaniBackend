@@ -1,13 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
-const {
-  getWalletBalance,
-  createWallet,
-  addFunds,
-  deductFunds,
-  getTransactionHistory,
-} = require("../controllers/walletController");
+const { getWalletBalance, createWallet, addFunds, deductFunds, getTransactionHistory, } = require("../controllers/walletController");
 
 // Middleware to protect routes
 router.use(protect);

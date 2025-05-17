@@ -24,44 +24,32 @@ exports.getAllAppointments = async (req, res) => {
 };
 
 exports.getAllAstrologerAppointments = async (req, res) => {
-    try {
-      const page = parseInt(req.query.page) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
-      const skip = (page - 1) * limit;
-  
-      console.log("AstroId", req.user._id);
-  
-      const appointments = await Appointment.find({
-        astrologerId: req.user._id,
-      })
-        .skip(skip)
-        .limit(limit)
-        .populate("userId");
-  
-      const totalAppointments = await Appointment.countDocuments({
-        astrologerId: req.user._id,
-      });
-  
-      res.status(200).json({
-        success: true,
-        count: appointments.length,
-        total: totalAppointments,
-        data: appointments,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: error.message });
-    }
-  };
-  
+  try {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const skip = (page - 1) * limit;
+
+    // console.log("AstroId", req.user._id);
+
+    const appointments = await Appointment.find({ astrologerId: req.user._id, })
+      .skip(skip)
+      .limit(limit)
+      .populate("userId");
+
+    const totalAppointments = await Appointment.countDocuments({ astrologerId: req.user._id, });
+
+    res.status(200).json({ success: true, count: appointments.length, total: totalAppointments, data: appointments, });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Get a single appointment
 exports.getAppointmentById = async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params.id).populate(
-      "userId astrologerId"
-    );
-    if (!appointment)
-      return res.status(404).json({ message: "Appointment not found" });
+    const appointment = await Appointment.findById(req.params.id).populate("userId astrologerId");
+    if (!appointment) return res.status(404).json({ message: "Appointment not found" });
     res.status(200).json(appointment);
   } catch (error) {
     res.status(500).json({ error: error.message });
