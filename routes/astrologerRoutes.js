@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/authMiddleware");
-const { getAstrologers, getAstrologer, createAstrologer, createAstrologerWithAccount, updateAstrologer, deleteAstrologer, getAstrologersBySpecialty, getTopRatedAstrologers, toggleAstrologerAvailability, getAstrologerTodayStats, enableDisableChat, enableDisableCall, getAstrologerCharges, getAstrologerUsingToken, updateAstrologerUsingToken, updatedStatusAstro, toggleOnlineAstrologerAvailability } = require("../controllers/astrologerController");
+const { getAstrologers, getAstrologer, createAstrologer, createAstrologerWithAccount, updateAstrologer, deleteAstrologer, getAstrologersBySpecialty, getTopRatedAstrologers, toggleAstrologerAvailability, getAstrologerTodayStats, enableDisableChat, enableDisableCall, getAstrologerCharges, getAstrologerUsingToken, updateAstrologerUsingToken, updatedStatusAstro, toggleOnlineAstrologerAvailability, enableDisableVideoCall } = require("../controllers/astrologerController");
 
 // Public routes
 router.get("/", getAstrologers);
@@ -25,6 +25,7 @@ router.put('/enable-disable-chat', protect, authorize('astrologer'), enableDisab
 
 // Route to enable/disable call
 router.put('/enable-disable-call', protect, authorize('astrologer'), enableDisableCall);
+router.put('/enable-disable-video-call', protect, authorize('astrologer'), enableDisableVideoCall);
 // Admin only routes
 // router.post("/", authorize("admin"), createAstrologer);
 router.post("/create", protect, authorize("admin"), createAstrologerWithAccount);

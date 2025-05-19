@@ -65,6 +65,10 @@ const AstrologerSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    isVideoCallEnabled: {
+      type: Boolean,
+      default: true,
+    },
     chatChargePerMinute: {
       type: Number,
       required: true,

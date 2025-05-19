@@ -514,6 +514,30 @@ exports.enableDisableCall = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.enableDisableVideoCall = async (req, res) => {
+  try {
+    const astrologerId = req.user._id; // Get astrologer ID from token (authentication middleware)
+    const { isVideoCallEnabled } = req.body;
+    // console.log("req.body: ", req.body);
+
+    // Update the isCallEnabled field
+    const updatedAstrologer = await Astrologer.findOneAndUpdate(
+      { userId: astrologerId },
+      { isVideoCallEnabled },
+      { new: true }
+    );
+
+    if (!updatedAstrologer) {
+      return res.status(404).json({ success: false, message: 'Astrologer not found' });
+    }
+
+    res.status(200).json({ success: true, data: updatedAstrologer });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // Get charge per minute for chat and call
 exports.getAstrologerCharges = async (req, res) => {
   try {
