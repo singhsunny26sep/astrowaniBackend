@@ -39,12 +39,7 @@ const getAllCategories = async (req, res) => {
     const totalCategories = await Category.countDocuments();
 
     // Prepare response with pagination info
-    res.status(200).json({
-      totalCategories,
-      totalPages: Math.ceil(totalCategories / limit),
-      currentPage: page,
-      categories,
-    });
+    res.status(200).json({ totalCategories, totalPages: Math.ceil(totalCategories / limit), currentPage: page, categories, });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

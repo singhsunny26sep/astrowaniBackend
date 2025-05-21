@@ -7,6 +7,7 @@ exports.createReview = async (req, res) => {
   try {
     const { astrologerId, rating, comment } = req.body;
     const userId = req.user._id;
+    // const userId = "67a356cb27c3c1d1c666d439"
 
     // Check if the astrologer exists
     const astrologer = await Astrologer.findById(astrologerId);
@@ -37,13 +38,15 @@ exports.createReview = async (req, res) => {
 // Get all reviews for an astrologer
 exports.getAllReviews = async (req, res) => {
   try {
-    const { astrologerId } = req.params;
+    // const { astrologerId } = req.params;
+    const astrologerId = req.user?._id
     const reviews = await Review.find().populate({ path: "user", select: "firstName lastName email profilePic", }).sort({ createdAt: -1 });
     res.status(200).json(reviews);
   } catch (error) {
     res.status(500).json({ message: "Error fetching reviews", error: error.message });
   }
 };
+
 // Get all reviews for an astrologer
 exports.getAstrologerReviews = async (req, res) => {
   try {

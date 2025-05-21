@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/authMiddleware");
-const { getAstrologers, getAstrologer, createAstrologer, createAstrologerWithAccount, updateAstrologer, deleteAstrologer, getAstrologersBySpecialty, getTopRatedAstrologers, toggleAstrologerAvailability, getAstrologerTodayStats, enableDisableChat, enableDisableCall, getAstrologerCharges, getAstrologerUsingToken, updateAstrologerUsingToken, updatedStatusAstro, toggleOnlineAstrologerAvailability, enableDisableVideoCall } = require("../controllers/astrologerController");
+const { getAstrologers, getAstrologer, createAstrologer, createAstrologerWithAccount, updateAstrologer, deleteAstrologer, getAstrologersBySpecialty, getTopRatedAstrologers, toggleAstrologerAvailability, getAstrologerTodayStats, enableDisableChat, enableDisableCall, getAstrologerCharges, getAstrologerUsingToken, updateAstrologerUsingToken, updatedStatusAstro, toggleOnlineAstrologerAvailability, enableDisableVideoCall, liveAstrologers } = require("../controllers/astrologerController");
 
 // Public routes
 router.get("/", getAstrologers);
@@ -13,8 +13,10 @@ router.get('/charges', protect, authorize('astrologer'), getAstrologerCharges);
 router.get("/get-astrologer", protect, authorize("astrologer"), getAstrologerUsingToken);
 router.put("/update-astrologer", protect, authorize("astrologer"), updateAstrologerUsingToken);
 
+router.get("/liveAstrologers", liveAstrologers);
 router.get("/:id", getAstrologer);
 router.get("/specialty/:categoryId", getAstrologersBySpecialty);
+
 // router.get("/top-rated", getTopRatedAstrologers);
 
 

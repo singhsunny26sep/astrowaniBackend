@@ -7,7 +7,7 @@ router.post("/", protect, reviewController.createReview);
 
 router.get("/astrologer/:astrologerId", reviewController.getAstrologerReviews);
 
-router.get("/astrologers/reviews", reviewController.getAllReviews);
+router.get("/astrologers/reviews", /* protect, */ reviewController.getAllReviews);
 
 router.put("/:reviewId", protect, reviewController.updateReview);
 

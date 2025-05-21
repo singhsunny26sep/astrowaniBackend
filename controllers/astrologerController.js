@@ -177,13 +177,24 @@ exports.deleteAstrologer = async (req, res, next) => {
 // @access  Public
 exports.getAstrologersBySpecialty = async (req, res, next) => {
   try {
-    const astrologers = await Astrologer.find({
-      specialties: req.params.categoryId,
-    }).populate("specialties", "name");
-    res
-      .status(200)
-      .json({ success: true, count: astrologers.length, data: astrologers });
+    let filter = {};
+    if (req.params.categoryId) {
+      filter = { specialties: req.params.categoryId }
+    }
+    const astrologers = await Astrologer.find(filter).populate("specialties", "name");
+    res.status(200).json({ success: true, count: astrologers.length, data: astrologers });
   } catch (error) {
+    res.status(500).json({ success: false, error: "Server Error" });
+  }
+};
+
+exports.liveAstrologers = async (req, res, next) => {
+  
+  try {
+    const astrologers = await Astrologer.find({ isAvailable: true }).populate("specialties", "name");
+    res.status(200).json({ success: true, count: astrologers.length, data: astrologers });
+  } catch (error) {
+    console.log("error on liveAstrologers:", error);
     res.status(500).json({ success: false, error: "Server Error" });
   }
 };
@@ -193,13 +204,8 @@ exports.getAstrologersBySpecialty = async (req, res, next) => {
 // @access  Public
 exports.getTopRatedAstrologers = async (req, res, next) => {
   try {
-    const astrologers = await Astrologer.find()
-      .sort({ rating: -1 })
-      .limit(5)
-      .populate("specialties", "name");
-    res
-      .status(200)
-      .json({ success: true, count: astrologers.length, data: astrologers });
+    const astrologers = await Astrologer.find().sort({ rating: -1 }).limit(5).populate("specialties", "name");
+    res.status(200).json({ success: true, count: astrologers.length, data: astrologers });
   } catch (error) {
     res.status(500).json({ success: false, error: "Server Error" });
   }
@@ -213,10 +219,7 @@ exports.toggleAstrologerAvailability = async (req, res, next) => {
     let astrologer = await Astrologer.findById(req.params.id);
 
     if (!astrologer) {
-      return res.status(404).json({
-        success: false,
-        error: `Astrologer not found with id of ${req.params.id}`,
-      });
+      return res.status(404).json({ success: false, error: `Astrologer not found with id of ${req.params.id}`, });
     }
 
     // Ensure the astrologer can only toggle their own availability
@@ -224,10 +227,7 @@ exports.toggleAstrologerAvailability = async (req, res, next) => {
       astrologer.userId.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
-      return res.status(401).json({
-        success: false,
-        error: `User ${req.user.id} is not authorized to update this astrologer`,
-      });
+      return res.status(401).json({ success: false, error: `User ${req.user.id} is not authorized to update this astrologer`, });
     }
 
     astrologer.isAvailable = !astrologer.isAvailable;
