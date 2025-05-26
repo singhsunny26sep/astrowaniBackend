@@ -202,6 +202,7 @@ exports.login = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    // console.log("req.body: ", req.body);
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -422,6 +423,7 @@ exports.resetPassword = async (req, res) => {
 exports.requestAstroOTP = async (req, res) => {
   try {
     const { email, fcm } = req.body;
+    // console.log("req.body: ", req.body);
 
     // Find user by email without password, firstName, and lastName
     let user = await User.findOne({ email, role: "astrologer" });

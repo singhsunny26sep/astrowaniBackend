@@ -10,7 +10,7 @@ exports.protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
   // console.log("1");
-  // console.log(token);
+  // console.log("token: ", token);
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Not authorized to access this route" });
@@ -26,7 +26,7 @@ exports.protect = async (req, res, next) => {
     //   new Date(decoded.exp * 1000).toISOString()
     // );
     req.user = await User.findById(decoded.id);
-    // console.log(req.user);
+    // console.log("req.user: ", req.user);
 
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Not authorized to access this route", });
@@ -50,8 +50,17 @@ exports.authorize = (...roles) => {
 
 exports.socketAuthenticator = async (socket, next) => {
   try {
+    // console.log(" =================== socketAuthenticator =================== ");
+    // console.log("socket.handshake.headers: ", socket.handshake);
+
+
     // Get the token from socket handshake auth
-    const token = socket.handshake.headers.authorization?.split(' ')[1];
+    // const token = socket.handshake.headers.auth?.split(' ')[1];
+    const token = socket.handshake.auth.token;
+
+    // console.log("token: ", token);
+    const postToken = socket.handshake.headers.auth
+    // console.log("postToken: ", postToken);
 
     if (!token) {
       return next(new Error('Authentication error: No token provided'));
@@ -59,6 +68,8 @@ exports.socketAuthenticator = async (socket, next) => {
 
     // Verify the token
     const decoded = jwt.verify(token, config.JWT_SECRET);
+    // const decoded = jwt.verify(token || postToken, config.JWT_SECRET);
+    // console.log("decoded: ", decoded);
 
     // Find the user by ID from the decoded token
     const user = await User.findById(decoded.id);

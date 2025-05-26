@@ -146,6 +146,8 @@ app.post("/api/getRoomId", protect, (req, res) => {
   }
   const userId = req.user._id;
   const roomId = generateRoomId(userId, recipientId);
+  // console.log("roomId: ", roomId);
+
   res.status(200).json({ success: true, roomId });
 });
 
@@ -163,7 +165,7 @@ io.on("connection", (socket) => {
     // Fetch the user's role and details (assuming socket.user is set via authentication middleware)
     const user = await userModel.findById(socket.user._id);
     if (user) {
-      if (user.role === "customer") {
+      if (user.role === "customer" || user.role === "user") {
         // Send Welcome Message
         const welcomeMessage = {
           sender: "System", // Can be replaced with a system bot ID or astrologer's ID
@@ -178,6 +180,12 @@ io.on("connection", (socket) => {
 
   // Handle message
   socket.on("sendMessage", async ({ roomId, sessionId, receiver, message }) => {
+
+    console.log("roomId: ", roomId);
+    console.log("sessionId: ", sessionId);
+    console.log("receiver: ", receiver);
+    console.log("message: ", message);
+
     try {
       if (!receiver || !message) {
         return socket.emit("error", { message: "Invalid receiver or message" });

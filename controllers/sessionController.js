@@ -370,7 +370,7 @@ const mongoose = require('mongoose');
 // @route   POST /api/sessions
 // @access  Private
 exports.createSession = async (req, res, next) => {
-  const { sessionType, astrologerId, clientId, startTime, chargePerMinute, } = req.body;
+  const { sessionType, astrologerId, /* clientId, */ startTime, chargePerMinute, } = req.body;
 
   // const sessionType = "chat"
   // const astrologerId = "6728a2ab0729a58cf740fd74"
@@ -378,7 +378,7 @@ exports.createSession = async (req, res, next) => {
   // const startTime = new Date()
   // const chargePerMinute = 1
   try {
-    const newSession = await Session.create({ sessionType, astrologerId, clientId, startTime, chargePerMinute, status: "ongoing", });
+    const newSession = await Session.create({ sessionType, astrologerId, clientId: req.user?._id, startTime, chargePerMinute, status: "ongoing", });
 
     res.status(201).json({ success: true, data: newSession, });
   } catch (error) {

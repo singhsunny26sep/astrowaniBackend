@@ -263,6 +263,7 @@ const createBlog = async (req, res) => {
     await newBlog.save();
     res.status(201).json(newBlog);
   } catch (error) {
+    console.log("error on createBlog: ", error);
     res.status(500).json({ error: error.message });
   }
 };

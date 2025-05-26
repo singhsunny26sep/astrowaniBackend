@@ -2,69 +2,7 @@ const { updateSessionActivity } = require("../helpers/updateSessionActivity");
 const Chat = require("../models/chatModel");
 const Session = require("../models/sessionModel");
 const userModel = require("../models/userModel");
-
-
-// exports.getChatHistory = async (req, res) => {
-//   try {
-//     const { receiver } = req.body;
-//     const userId = req.user._id;
-
-//     // Fetch chat history where the user is either the sender or receiver
-//     const chatHistory = await Chat.find({
-//       $or: [
-//         { sender: userId, receiver },
-//         { sender: receiver, receiver: userId }
-//       ]
-//     }).sort({ createdAt: -1 });
-
-//     res.status(200).json({ success: true, data: chatHistory });
-//   } catch (error) {
-//     console.error("Error fetching chat history:", error);
-//     res.status(500).json({ success: false, message: "Error fetching chat history" });
-//   }
-// };
-
-// exports.getChatHistory = async (req, res) => {
-//   try {
-//     const { receiver, page = 1, limit = 10 } = req.body; // Default values for page and limit
-//     const userId = req.user._id;
-
-//     // Calculate the number of documents to skip
-//     const skip = (page - 1) * limit;
-
-//     // Fetch paginated chat history
-//     const chatHistory = await Chat.find({
-//       $or: [
-//         { sender: userId, receiver },
-//         { sender: receiver, receiver: userId }
-//       ]
-//     })
-//       .sort({ createdAt: -1 }) // Sort in descending order
-//       .skip(skip)
-//       .limit(limit);
-
-//     // Count total chats between the two users
-//     const totalChats = await Chat.countDocuments({
-//       $or: [
-//         { sender: userId, receiver },
-//         { sender: receiver, receiver: userId }
-//       ]
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       data: chatHistory,
-//       pagination: {
-//         totalChats,
-//         currentPage: page,
-//         totalPages: Math.ceil(totalChats / limit),
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Error fetching chat history:", error);
-//     res.status(500).json({ success: false, message: "Error fetching chat history" });
-//   }
-// };
+const { logger } = require("../utils/logger/logger");
 
 exports.getChatHistory = async (req, res) => {
   try {
@@ -72,19 +10,11 @@ exports.getChatHistory = async (req, res) => {
     const page = parseInt(req.query.page, 1) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const userId = req.user._id;
-
     // console.log("userId:", userId);
-
-
-
     const skip = (page - 1) * limit;
 
-
     const chatHistory = await Chat.find({ $or: [{ sender: userId, receiver }, { sender: receiver, receiver: userId },] }).sort({ createdAt: 1 }).skip(skip).limit(limit);
-
-
     const totalChats = await Chat.countDocuments({ $or: [{ sender: userId, receiver }, { sender: receiver, receiver: userId },] });
-
     res.status(200).json({ success: true, data: chatHistory, pagination: { totalChats, currentPage: page, totalPages: Math.ceil(totalChats / limit), }, });
   } catch (error) {
     console.error("Error fetching chat history:", error);
@@ -92,48 +22,35 @@ exports.getChatHistory = async (req, res) => {
   }
 };
 
+exports.getChatHistoryUser = async (req, res) => {
+  try {
+    const { receiver, sessionId } = req.query;
+    const userId = req.user._id;
 
-// exports.getAllChatHistory = async (req, res) => {
-//   const userId = req.user._id;
-//   // const userId = "6728a2ab0729a58cf740fd74"
-//   try {
-//     /* const chat = await Chat.find({ sender: userId }).populate("receiver")
-//     const chats = await Chat.aggregate([
-//       { $match: { sender: userId } }, // Match chats sent by the user
-//       { $group: { _id: "$receiver", latestChat: { $last: "$$ROOT" } } }, // Group by receiver and get the latest chat
-//       { $replaceRoot: { newRoot: "$latestChat" } }, // Replace the document root with the latest chat
-//     ]).exec(); */
+    const matchCondition = {
+      $or: [
+        { sender: userId, receiver },
+        { sender: receiver, receiver: userId }
+      ]
+    };
 
-//     // Populate the unique receiver field
-//     // await Chat.populate(chats, { path: "receiver" });
+    if (sessionId) {
+      matchCondition.sessionId = sessionId;
+    }
 
-//     /* console.log(chats);
-//     if (!chats) {
-//       return res.status(404).json({ success: false, message: "No chat found for this user" });
-//     }
-//     return res.status(200).json({ success: true, data: chats,chat }); */
+    const chatHistory = await Chat.find(matchCondition).sort({ createdAt: 1 });
 
-//     const chats = await Chat.find({ sender: userId }).populate("receiver").exec();
-
-//     // Use a Map to store unique receivers
-//     const uniqueChats = Array.from(
-//       chats.reduce((map, chat) => {
-//         if (!map.has(chat.receiver._id)) {
-//           map.set(chat.receiver._id, chat);
-//         }
-//         return map;
-//       }, new Map()).values()
-//     );
-//     return res.status(200).json({ success: true, message: "", uniqueChats })
-//   } catch (error) {
-//     console.error("Error on getAllChatHistory:", error);
-//     res.status(500).json({ success: false, message: error.message, error });
-//   }
-// }
+    res.status(200).json({ success: true, data: chatHistory });
+  } catch (error) {
+    console.error("Error fetching chat getChatHistoryUser:", error);
+    res.status(500).json({ success: false, message: "Error fetching chat history" });
+  }
+};
 
 
 exports.getAllChatHistory = async (req, res) => {
   const astrologerId = req.user._id; // Assuming the logged-in astrologer's ID is in req.user._id
+  console.log("astrologerId: ", astrologerId);
 
   try {
     // Find all chats where the astrologer is either the sender or receiver
@@ -143,15 +60,30 @@ exports.getAllChatHistory = async (req, res) => {
       .exec();
 
     // Use a Map to extract unique users chatting with the astrologer
-    const uniqueUsers = Array.from(
+    /* const uniqueUsers = Array.from(
       chats.reduce((map, chat) => {
         const otherUser = chat.sender._id.toString() === astrologerId.toString() ? chat.receiver : chat.sender; // Identify the other party in the chat
-        if (!map.has(otherUser._id.toString())) {
-          map.set(otherUser._id.toString(), otherUser); // Add unique user to the Map
+        console.log("otherUser: ", otherUser);
+
+        if (!map.has(otherUser?._id?.toString())) {
+          map.set(otherUser?._id?.toString(), otherUser); // Add unique user to the Map
         }
         return map;
       }, new Map()).values()
+    ); */
+    const uniqueUsers = Array.from(
+      chats.reduce((map, chat) => {
+        const otherUser = chat.sender?._id?.toString() === astrologerId?.toString() ? chat.receiver : chat.sender;
+        // ✅ Handle null and undefined values
+        if (otherUser && otherUser._id && !map.has(otherUser._id.toString())) {
+          map.set(otherUser._id.toString(), otherUser);
+        }
+
+        return map;
+      }, new Map()).values()
     );
+
+    console.log("uniqueUsers: ", uniqueUsers);
 
     return res.status(200).json({ success: true, message: "Unique users chatting with astrologer retrieved successfully.", data: uniqueUsers, });
   } catch (error) {
@@ -166,20 +98,13 @@ exports.updateChatDetails = async (req, res, next) => {
     const { earnings, paid, status } = req.body;
     const chatId = req.params.chatId;
 
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      { earnings, paid, status },
-      { new: true, runValidators: true }
-    );
+    const updatedChat = await Chat.findByIdAndUpdate(chatId, { earnings, paid, status }, { new: true, runValidators: true });
 
     if (!updatedChat) {
       return res.status(404).json({ success: false, message: "Chat not found" });
     }
 
-    res.status(200).json({
-      success: true,
-      data: updatedChat,
-    });
+    res.status(200).json({ success: true, data: updatedChat, });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -206,12 +131,7 @@ exports.createChatMessage = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "Receiver user not found", });
     }
-    const newChat = await Chat.create({
-      sessionId,
-      sender,
-      receiver: user._id,
-      message,
-    });
+    const newChat = await Chat.create({ sessionId, sender, receiver: user._id, message, });
 
     res.status(201).json({ success: true, data: newChat, });
   } catch (error) {

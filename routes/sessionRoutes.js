@@ -17,7 +17,7 @@ router.get('/connected-astrologers', protect, authorize('customer'), sessionCont
 // router.get('/chat/:sessionId',  sessionController.getChatHistory);
 // router.post('/feedback/:sessionId',  sessionController.addFeedback);
 // Routes
-router.post("/", sessionController.createSession); // Create a new session
+router.post("/", protect, sessionController.createSession); // Create a new session
 router.get("/", sessionController.getSessions); // Get session history for astrologer or client
 router.put("/:id", sessionController.updateSession); // Update a session
 router.delete("/:id", sessionController.deleteSession); // Delete a session
