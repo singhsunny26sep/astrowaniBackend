@@ -22,17 +22,10 @@ exports.createThought = async (req, res) => {
         const thought = new Thought({ thoughtText, author });
         await thought.save();
 
-        res.status(201).json({
-            success: true,
-            message: "Thought created successfully.",
-            data: thought,
-        });
+        res.status(201).json({ success: true, message: "Thought created successfully.", data: thought, });
     } catch (error) {
         console.error("Error creating thought:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to create thought.",
-        });
+        res.status(500).json({ success: false, message: "Failed to create thought.", });
     }
 };
 

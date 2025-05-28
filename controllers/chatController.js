@@ -1,4 +1,5 @@
 const { updateSessionActivity } = require("../helpers/updateSessionActivity");
+const Astrologer = require("../models/astrologerModel");
 const Chat = require("../models/chatModel");
 const Session = require("../models/sessionModel");
 const userModel = require("../models/userModel");
@@ -24,6 +25,8 @@ exports.getChatHistory = async (req, res) => {
 
 exports.getChatHistoryUser = async (req, res) => {
   try {
+    console.log("req.query: ", req.query);
+
     const { receiver, sessionId } = req.query;
     const userId = req.user._id;
 
@@ -48,7 +51,7 @@ exports.getChatHistoryUser = async (req, res) => {
 };
 
 
-exports.getAllChatHistory = async (req, res) => {
+/* exports.getAllChatHistory = async (req, res) => {
   const astrologerId = req.user._id; // Assuming the logged-in astrologer's ID is in req.user._id
   console.log("astrologerId: ", astrologerId);
 
@@ -59,18 +62,6 @@ exports.getAllChatHistory = async (req, res) => {
       .populate("receiver", "name email  firstName lastName profilePic") // Populate receiver details
       .exec();
 
-    // Use a Map to extract unique users chatting with the astrologer
-    /* const uniqueUsers = Array.from(
-      chats.reduce((map, chat) => {
-        const otherUser = chat.sender._id.toString() === astrologerId.toString() ? chat.receiver : chat.sender; // Identify the other party in the chat
-        console.log("otherUser: ", otherUser);
-
-        if (!map.has(otherUser?._id?.toString())) {
-          map.set(otherUser?._id?.toString(), otherUser); // Add unique user to the Map
-        }
-        return map;
-      }, new Map()).values()
-    ); */
     const uniqueUsers = Array.from(
       chats.reduce((map, chat) => {
         const otherUser = chat.sender?._id?.toString() === astrologerId?.toString() ? chat.receiver : chat.sender;
@@ -90,7 +81,105 @@ exports.getAllChatHistory = async (req, res) => {
     console.error("Error on getAllChatHistory:", error);
     res.status(500).json({ success: false, message: error.message, error });
   }
+}; */
+/* exports.getAllChatHistory = async (req, res) => {
+  const astrologerId = req.user._id;
+
+  try {
+    const chats = await Chat.find({
+      $or: [{ sender: astrologerId }, { receiver: astrologerId }]
+    })
+      .populate("sender", "name email firstName lastName profilePic")
+      .populate("receiver", "name email firstName lastName profilePic")
+      .sort({ createdAt: 1 })
+      .exec();
+
+    const chatMap = new Map();
+
+    chats.forEach(chat => {
+      // Skip if sender or receiver is null (defensive check)
+      if (!chat.sender || !chat.receiver) return;
+
+      const isSender = chat.sender._id.toString() === astrologerId.toString();
+      const otherUser = isSender ? chat.receiver : chat.sender;
+
+      if (!otherUser || !otherUser._id) return; // Ensure otherUser is valid
+
+      const otherUserId = otherUser._id.toString();
+
+      if (!chatMap.has(otherUserId)) {
+        chatMap.set(otherUserId, {
+          user: otherUser,
+          messages: []
+        });
+      }
+
+      chatMap.get(otherUserId).messages.push({
+        _id: chat._id,
+        sessionId: chat.sessionId,
+        sender: chat.sender,
+        receiver: chat.receiver,
+        message: chat.message,
+        createdAt: chat.createdAt,
+        updatedAt: chat.updatedAt
+      });
+    });
+
+    const chatHistory = Array.from(chatMap.values());
+    console.log("chatHistory: ", chatHistory);
+
+    return res.status(200).json({
+      success: true,
+      message: "Chat history with users retrieved successfully.",
+      data: chatHistory
+    });
+  } catch (error) {
+    console.error("Error in getAllChatHistory:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}; */
+
+exports.getAllChatHistory = async (req, res) => {
+  const astrologerId = req.user._id;
+
+  try {
+    // Step 1: Get all ongoing chat sessions for this astrologer
+    const checkAstrologer = await Astrologer.findOne({ userId: astrologerId });
+    if (!checkAstrologer) {
+      return res.status(404).json({ success: false, msg: 'Astrologer not found' })
+    }
+    const sessions = await Session.find({
+      astrologerId: checkAstrologer?._id,
+      sessionType: "chat",
+      status: "ongoing"
+    }).populate("clientId", "name email firstName lastName profilePic").sort({ updatedAt: -1 });
+
+    // Step 2: Build user list with sessionId and socket roomId
+    const chatUsers = sessions.map((session) => {
+      return {
+        user: session.clientId,
+        sessionId: session._id,
+        roomId: `${session.clientId._id.toString()}_${session.astrologerId.toString()}`
+      };
+    });
+    /* const chatUsers = sessions.map((session) => {
+      return {
+        user: session.clientId,
+        sessionId: session._id,
+        roomId: `${session.clientId}_${session.astrologerId}` // or any unique socket room identifier
+      };
+    }); */
+
+    // console.log("uniqueUsers: ", chatUsers);
+
+    return res.status(200).json({ success: true, message: "Active chat users with sessions retrieved successfully.", data: chatUsers });
+
+  } catch (error) {
+    console.error("Error in getAllChatHistory:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
+
 
 
 exports.updateChatDetails = async (req, res, next) => {

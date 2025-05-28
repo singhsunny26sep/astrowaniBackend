@@ -158,6 +158,8 @@ io.on("connection", (socket) => {
 
   // Join room
   socket.on("join_room", async (roomId) => {
+    console.log("roomId: ", roomId);
+
     roomID = roomId;
     socket.join(roomID);
     console.log(`Socket ${socket.id} joined users room-id ${roomID}`);

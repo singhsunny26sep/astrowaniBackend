@@ -189,7 +189,7 @@ exports.getAstrologersBySpecialty = async (req, res, next) => {
 };
 
 exports.liveAstrologers = async (req, res, next) => {
-  
+
   try {
     const astrologers = await Astrologer.find({ isAvailable: true }).populate("specialties", "name");
     res.status(200).json({ success: true, count: astrologers.length, data: astrologers });

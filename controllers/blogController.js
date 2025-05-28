@@ -274,7 +274,7 @@ const getAllBlogs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // Default limit
     const page = parseInt(req.query.page) || 1;   // Default page
 
-    const blogs = await Blog.find().populate("category").limit(limit).skip((page - 1) * limit);
+    const blogs = await Blog.find().sort({ createdAt: -1 }).populate("category").limit(limit).skip((page - 1) * limit);
 
     const totalBlogs = await Blog.countDocuments();
 

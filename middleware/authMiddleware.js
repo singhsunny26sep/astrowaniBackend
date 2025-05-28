@@ -59,7 +59,7 @@ exports.socketAuthenticator = async (socket, next) => {
     const token = socket.handshake.auth.token;
 
     // console.log("token: ", token);
-    const postToken = socket.handshake.headers.auth
+    // const postToken = socket.handshake.headers.auth
     // console.log("postToken: ", postToken);
 
     if (!token) {
