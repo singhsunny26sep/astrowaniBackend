@@ -80,10 +80,20 @@ const creatRoomId = async () => {
 
 // Initiate a call
 const initiateCall = async (req, res) => {
+  console.log("============================= initiateCall =============================");
+  console.log("req.body: ", req.body);
+
+
   try {
     const { receiverId, callType } = req.body;
     const callerId = req.user._id;
     const callerRole = req.user.role;
+
+    console.log("receiverId: ", receiverId);
+    console.log("callType: ", callType);
+    console.log("callerId: ", callerId);
+    console.log("callerRole: ", callerRole);
+
 
     // Validate call type
     if (!["video", "voice"].includes(callType)) {
@@ -191,8 +201,8 @@ const initiateCall = async (req, res) => {
       roomId: roomId,
     };
 
-    // console.log(" ===================================== data ========================================= ");
-    // console.log("data: ", data);
+    console.log(" ===================================== data ========================================= ");
+    console.log("data: ", data);
 
 
     const token = await creatToken(data);
@@ -206,6 +216,11 @@ const initiateCall = async (req, res) => {
       startTime: new Date(),
       status: "ongoing",
     });
+
+    console.log(" =============================== session ============================");
+    console.log("session: ", session);
+
+
 
     // Get receiver's FCM token
     const receiver = await User.findById(receiverId);
@@ -237,7 +252,7 @@ const initiateCall = async (req, res) => {
     }); */
 
     // Create notification record
-    await Notification.create({
+    await receiver.create({
       userId: receiverId,
       title,
       message,
@@ -246,7 +261,7 @@ const initiateCall = async (req, res) => {
         roomId
       },
     });
-
+    console.log("============================= end initiateCall end =============================");
     res.status(200).json({ success: true, data: { ...credentials, callType, roomId, sessionId: session._id, receiver: { name: receiver.firstName, role: receiver.role, }, token, }, });
   } catch (error) {
     console.error("Call initiation error:", error);
@@ -441,6 +456,9 @@ const initiateCall = async (req, res) => {
 }; */
 
 const endCall = async (req, res) => {
+  console.log(" ======================================== endCall ========================================= ");
+  console.log("req.body: ", req.body);
+
   try {
     const { sessionId, duration, rating, feedback, roomId } = req.body;
 
@@ -452,6 +470,9 @@ const endCall = async (req, res) => {
     if (!session) {
       return res.status(404).json({ success: false, message: "Session not found" });
     }
+
+    console.log("session: ", session);
+
 
     if (session.status !== "ongoing") {
       return res.status(400).json({ success: false, message: "Call is not ongoing" });
@@ -496,7 +517,7 @@ const endCall = async (req, res) => {
     await session.save();
 
     // Save call history
-    await CallHistory.create({
+    const callhistory = await CallHistory.create({
       astrologerId: session.astrologerId,
       clientId: session.clientId,
       callStartTime: session.startTime,
@@ -506,6 +527,9 @@ const endCall = async (req, res) => {
       rating,
       comments: feedback,
     });
+
+    console.log("CallHistory: ", callhistory);
+
 
     // Send FCM notifications
     const users = await User.find({ _id: { $in: [session.astrologerId, session.clientId] } });
@@ -522,7 +546,7 @@ const endCall = async (req, res) => {
         });
       }
     }
-
+    console.log(" ======================================== end endCall end ========================================= ");
     return res.status(200).json({ success: true, data: { duration: callDuration, totalCharge, sessionId: session._id, clientBalance: client.wallet, }, });
   } catch (error) {
     console.error("Error in endCall:", error);
@@ -587,8 +611,10 @@ const handleMissedCall = async (req, res) => {
 };
 
 const acceptCall = async (req, res) => {
-
+  console.log("============================= acceptCall =============================");
   const { sessionId, receiverId, roomId } = req.body;
+  console.log("req.body: ", req.body);
+
   try {
 
     // Fetch session details
@@ -613,10 +639,12 @@ const acceptCall = async (req, res) => {
       user_ref: receiverId?.toString(),
       roomId: roomId,
     };
+    console.log("data: ", data);
 
     const token = await creatToken(data);
-    // console.log("token: ", token);
+    console.log("token: ", token);
 
+    console.log("============================= end acceptCall end =============================");
     res.status(200).json({ success: true, data: { roomId, sessionId: session._id, token, }, });
   } catch (error) {
     console.error("Call acceptance error:", error);

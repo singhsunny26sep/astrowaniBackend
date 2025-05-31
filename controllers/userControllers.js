@@ -1,5 +1,7 @@
 // userController.js
 const User = require("../models/userModel");
+const msg91 = require('msg91').default;
+require('dotenv').config()
 
 const { sendEmail } = require("../helpers/emailHelper");
 const { generateOTP } = require("../helpers/otpHelper");
@@ -8,57 +10,8 @@ const jwt = require("jsonwebtoken");
 const Astrologer = require("../models/astrologerModel");
 const Plan = require("../models/plansModel");
 const { urlSendTestOtp, urlVerifyOtp } = require("../service/sendOtp");
+const { sendOTP } = require("../utils/logger/utils");
 
-// exports.requestOTP = async (req, res) => {
-//   try {
-//     const { email, fcm } = req.body;
-
-//     // Find user by email without password, firstName, and lastName
-//     let user = await User.findOne({ email });
-
-//     // If user doesn't exist, create a new one
-//     if (!user) {
-//       user = new User({ email }); // Only set email when creating a new user
-//       await user.save();
-//     }
-
-//     const otp = generateOTP();
-//     user.otp = {
-//       code: otp,
-//       expiresAt: Date.now() + 10 * 60 * 1000, // OTP valid for 10 minutes
-//     };
-//     // Save or update FCM token
-//     if (fcm) {
-//       user.fcm = fcm;
-//     }
-//     await user.save();
-
-//     // Define the HTML email content
-//     const otpHtml = `
-//       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #dddddd; border-radius: 10px;">
-//         <h2 style="color: #333;">OTP Verification</h2>
-//         <p style="color: #555;">
-//           Your OTP is
-//         </p>
-//         <div style="text-align: center; margin: 20px 0;">
-//           <p style="font-size: 18px; font-weight: bold; color: #007BFF;">${otp}</p>
-//         </div>
-//         <p style="color: #999; font-size: 12px;">
-//           Best regards,<br>
-//           Your Service Team
-//         </p>
-//       </div>
-//     `;
-//     await sendEmail(email, "Verify Your Account", otpHtml);
-
-//     res.status(201).json({
-//       success: true,
-//       message: "OTP has been sent to your email. Please check your inbox.",
-//     });
-//   } catch (error) {
-//     res.status(400).json({ success: false, error: error.message });
-//   }
-// };
 
 exports.requestOTP = async (req, res) => {
   try {
@@ -137,8 +90,7 @@ exports.requestOTP = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, phoneNumber } =
-      req.body;
+    const { email, password, firstName, lastName, role, phoneNumber } = req.body;
 
     const user = await User.create({
       email,
@@ -224,6 +176,76 @@ exports.verifyOTP = async (req, res) => {
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
+exports.mobileOTPRequest = async (req, res) => {
+  const mobile = req.body?.mobile
+  try {
+    let checkUser = await User.findOne({ mobile: mobile })
+    if (!checkUser) {
+      const freePlan = await Plan.findOne({ name: "Free" });
+
+      if (!freePlan) {
+        return res.status(400).json({ success: false, message: "Free plan not found in the system." });
+      }
+
+      // Calculate plan duration and dates
+      const durationInDays = freePlan.duration || 28; // Default to 28 days
+      const startDate = new Date();
+      const endDate = new Date(startDate.getTime() + durationInDays * 24 * 60 * 60 * 1000); // Add duration in milliseconds
+
+      // Create a new user with the Free plan
+      checkUser = new User({
+        email,
+        activePlan: {
+          planId: freePlan._id,
+          startDate: startDate,
+          endDate: endDate,
+          remainingMessages: freePlan.maxMessages || 0,
+          remainingSize: freePlan.maxMessageSize || 0,
+        },
+      });
+      await checkUser.save();
+    }
+    const otpService = await msg91.getOTP(process.env.MSG91_TEMPLETE, { length: 6 });
+    await otpService.send(mobile);
+    return res.status(200).json({ msg: 'OTP sent to your mobile number.', success: true })
+
+  } catch (error) {
+    console.log("error on mobileOTPRequest: ", error)
+    return res.status(500).json({ error: error, success: false, msg: error.message })
+  }
+}
+
+exports.verifyMobileOtp = async (req, res) => {
+  const mobile = req.body?.mobile
+  const otp = req.body?.otp
+  const fcmToken = req.body?.fcmToken
+
+  try {
+    const checkUser = await User.findOne({ mobile: mobile })
+    if (!checkUser) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+    const otpService = await msg91.getOTP(process.env.MSG91_TEMPLETE, { length: 6 });
+    const result = await otpService.verify(mobile, otp);
+
+    // console.log("result: ", result);
+    if (result.message != 'OTP verified success') {
+      return res.status(400).json({ msg: result.message, success: false })
+    }
+    if (fcmToken) {
+      checkUser.fcm = fcmToken
+    }
+    const token = checkUser.getSignedJwtToken({ expiresIn: "30d", secret: process.env.JWT_SECRET, });
+    checkUser.isVerified = true;
+    await checkUser.save()
+    return res.status(200).json({ msg: 'Ok', success: true, token })
+
+  } catch (error) {
+    console.log("error on verifyMobileOtp: ", error)
+    return res.status(500).json({ error: error, success: false, msg: error.message })
+  }
+}
 
 exports.resendOTP = async (req, res) => {
   try {
