@@ -59,16 +59,16 @@ exports.socketAuthenticator = async (socket, next) => {
     const token = socket.handshake.auth.token;
 
     // console.log("token: ", token);
-    // const postToken = socket.handshake.headers.auth
-    // console.log("postToken: ", postToken);
+    const postToken = socket.handshake.headers.auth
+    console.log("postToken: ", postToken);
 
-    if (!token) {
+   /*  if (!token) {
       return next(new Error('Authentication error: No token provided'));
-    }
+    } */
 
     // Verify the token
-    const decoded = jwt.verify(token, config.JWT_SECRET);
-    // const decoded = jwt.verify(token || postToken, config.JWT_SECRET);
+    // const decoded = jwt.verify(token, config.JWT_SECRET);
+    const decoded = jwt.verify(token || postToken, config.JWT_SECRET);
     // console.log("decoded: ", decoded);
 
     // Find the user by ID from the decoded token

@@ -178,6 +178,9 @@ exports.verifyOTP = async (req, res) => {
 };
 
 exports.mobileOTPRequest = async (req, res) => {
+  console.log(" ================================= mobileOTPRequest ================================");
+  console.log("req.body: ", req.body);
+
   const mobile = req.body?.mobile
   try {
     let checkUser = await User.findOne({ mobile: mobile })
@@ -207,7 +210,7 @@ exports.mobileOTPRequest = async (req, res) => {
       await checkUser.save();
     }
     const otpService = await msg91.getOTP(process.env.MSG91_TEMPLETE, { length: 6 });
-    await otpService.send(mobile);
+    await otpService.send(`+91${mobile}`);
     return res.status(200).json({ msg: 'OTP sent to your mobile number.', success: true })
 
   } catch (error) {
@@ -217,6 +220,9 @@ exports.mobileOTPRequest = async (req, res) => {
 }
 
 exports.verifyMobileOtp = async (req, res) => {
+  console.log(" ====================== verifyMobileOtp ====================");
+  console.log("req.body: ", req.body);
+
   const mobile = req.body?.mobile
   const otp = req.body?.otp
   const fcmToken = req.body?.fcmToken
@@ -227,7 +233,7 @@ exports.verifyMobileOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "User not found" });
     }
     const otpService = await msg91.getOTP(process.env.MSG91_TEMPLETE, { length: 6 });
-    const result = await otpService.verify(mobile, otp);
+    const result = await otpService.verify(`+91${mobile}`, otp);
 
     // console.log("result: ", result);
     if (result.message != 'OTP verified success') {
