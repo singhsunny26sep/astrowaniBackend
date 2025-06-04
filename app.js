@@ -175,7 +175,7 @@ io.on("connection", (socket) => {
         // Send Welcome Message
         const welcomeMessage = {
           sender: "System", // Can be replaced with a system bot ID or astrologer's ID
-          message: "Welcome to OHM Astro! Our expert astrologers are here to guide you through the planets and nakshatras.",
+          message: "Welcome to Astrowani India! Our expert astrologers are here to guide you through the planets and nakshatras.",
           hindiMessage: "ओहम एस्ट्रो में आपका स्वागत है! हमारे विशेषज्ञ ज्योतिषी आपको ग्रहों व नक्षत्रों के माध्यम से मार्गदर्शन करने के लिए तैयार हैं।",
         };
 

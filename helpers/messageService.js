@@ -1,7 +1,7 @@
 const sendMessage = (user, messageType) => {
     const messages = {
       welcome: {
-        en: "Welcome to OHM Astro! Our expert astrologers are here to guide you through the planets and nakshatras.",
+        en: "Welcome to Astrowani India! Our expert astrologers are here to guide you through the planets and nakshatras.",
         hi: "ओहम एस्ट्रो में आपका स्वागत है! हमारे विशेषज्ञ ज्योतिषी आपको ग्रहों व नक्षत्रों के माध्यम से मार्गदर्शन करने के लिए तैयार हैं।",
       },
       thanks: {
