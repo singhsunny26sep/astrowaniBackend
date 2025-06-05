@@ -73,6 +73,47 @@ exports.setBanner = async (req, res) => {
   }
 };
 
+exports.addBanner = async (req, res) => {
+
+  // console.log("req.body: ", req.body);
+  const title = req.body?.title
+  const description = req.body?.description
+  const imageUrl = req.body?.imageUrl
+  try {
+    const checkBanner = await Banner.findOne({ title, });
+    if (checkBanner) {
+      return res.status(400).json({ message: "Banner already exists" });
+    }
+    const newBanner = new Banner({ title, description, imageUrl, isActive: true });
+    await newBanner.save();
+    res.status(201).json({ message: "Banner created successfully", banner: newBanner, });
+  } catch (error) {
+    console.error("Error setting addBanner:", error);
+    res.status(500).json({ message: "Failed to set add banner" });
+  }
+}
+
+exports.updateBanner = async (req, res) => {
+  const id = req.params?.id
+  const title = req.body?.title
+  const description = req.body?.description
+  const imageUrl = req.body?.imageUrl
+  try {
+    const checkBanner = await Banner.findById(id)
+    if (!checkBanner) {
+      return res.status(400).json({ message: "Banner not found" });
+    }
+    checkBanner.title = title || checkBanner.title
+    checkBanner.description = description || checkBanner.description
+    checkBanner.imageUrl = imageUrl || checkBanner.imageUrl
+    await checkBanner.save();
+    res.status(201).json({ message: "Banner updated successfully", banner: checkBanner, });
+  } catch (error) {
+    console.error("Error setting updateBanner:", error);
+    res.status(500).json({ message: "Failed to set update banner" });
+  }
+}
+
 
 // Delete a banner by ID
 exports.deleteBanner = async (req, res) => {
@@ -104,10 +145,7 @@ exports.getAllBanners = async (req, res) => {
     const skip = (pageNumber - 1) * limitNumber;
 
     // Fetch banners with pagination
-    const banners = await Banner.find()
-      .sort({ createdAt: -1 }) // Sort banners by most recent
-      .skip(skip)
-      .limit(limitNumber);
+    const banners = await Banner.find().sort({ createdAt: -1 }).skip(skip).limit(limitNumber);
 
     // Total count for banners
     const totalBanners = await Banner.countDocuments();

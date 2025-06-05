@@ -9,6 +9,10 @@ router.get("/current", bannerController.getCurrentBanner);
 // Set a new banner (create or update)
 router.put("/set", bannerController.setBanner);
 
+router.post('/add', /* protect, */ bannerController.addBanner)
+
+router.put('/update/:id', /* protect, */ bannerController.updateBanner)
+
 // Get all banners
 router.get("/all", bannerController.getAllBanners);
 

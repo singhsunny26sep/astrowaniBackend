@@ -159,7 +159,8 @@ exports.getAllChatHistory = async (req, res) => {
       return {
         user: session.clientId,
         sessionId: session._id,
-        roomId: `${session.astrologerId.toString()}_${session.clientId._id.toString()}`
+        // roomId: `${session.astrologerId.toString()}_${session.clientId._id.toString()}`
+        roomId: `${session.clientId._id.toString()}_${session.astrologerId.toString()}`
       };
     });
     /* const chatUsers = sessions.map((session) => {
