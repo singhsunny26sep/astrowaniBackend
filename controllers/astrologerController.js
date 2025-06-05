@@ -176,6 +176,8 @@ exports.deleteAstrologer = async (req, res, next) => {
 // @route   GET /api/v1/astrologers/specialty/:categoryId
 // @access  Public
 exports.getAstrologersBySpecialty = async (req, res, next) => {
+  console.log("req.params: ", req.params);
+
   try {
     let filter = {};
     if (req.params.categoryId) {
