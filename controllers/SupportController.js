@@ -3,7 +3,7 @@ const Support = require("../models/support");
 // POST: Create a new support request
 exports.createSupportRequest = async (req, res) => {
   try {
-    const { name, email, issueType, message, supportType } = req.body;
+    const { name, email, issueType, message, supportType, mobile } = req.body;
 
     // Create a new support request
     const supportRequest = new Support({
@@ -12,7 +12,8 @@ exports.createSupportRequest = async (req, res) => {
       email,
       issueType,
       message,
-      supportType
+      supportType,
+      mobile
     });
 
     await supportRequest.save();

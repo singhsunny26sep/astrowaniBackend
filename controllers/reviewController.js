@@ -40,7 +40,7 @@ exports.getAllReviews = async (req, res) => {
   try {
     // const { astrologerId } = req.params;
     const astrologerId = req.user?._id
-    const reviews = await Review.find().populate({ path: "user", select: "firstName lastName email profilePic", }).sort({ createdAt: -1 });
+    const reviews = await Review.find().populate({ path: "user", select: "firstName lastName email profilePic mobile", }).sort({ createdAt: -1 });
     res.status(200).json(reviews);
   } catch (error) {
     res.status(500).json({ message: "Error fetching reviews", error: error.message });

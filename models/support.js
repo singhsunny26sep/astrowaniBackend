@@ -16,6 +16,9 @@ const supportSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    mobile: {
+      type: String
+    },
     issueType: {
       type: String,
       required: true,
