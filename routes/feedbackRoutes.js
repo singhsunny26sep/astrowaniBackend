@@ -7,7 +7,7 @@ router.get("/", feedbackController.getAllFeedback);
 router.get("/top-rated", feedbackController.getTopRatedFeedback);
 router.get("/:id", feedbackController.getFeedbackById);
 
-router.use(protect)
+// router.use(protect)
 // Feedback Routes
 router.post("/", feedbackController.createFeedback);
 

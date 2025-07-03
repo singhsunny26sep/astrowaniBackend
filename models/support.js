@@ -19,6 +19,9 @@ const supportSchema = new mongoose.Schema(
     mobile: {
       type: String
     },
+    role: {
+      type: String,
+    },
     issueType: {
       type: String,
       required: true,

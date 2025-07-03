@@ -15,7 +15,6 @@ router.use(protect, authorize('admin'));
 // Create a new plan
 router.post("/create-plans", createPlan);
 
-
 // Get a single plan by ID
 router.get("/:planId", getPlanById);
 

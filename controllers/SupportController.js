@@ -8,6 +8,7 @@ exports.createSupportRequest = async (req, res) => {
     // Create a new support request
     const supportRequest = new Support({
       user: req?.user?._id,
+      role: req?.user?.role,
       name,
       email,
       issueType,
@@ -42,15 +43,18 @@ exports.getSupportRequests = async (req, res) => {
     // Get page and limit from query parameters, and set default values if not provided
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const role = req.query.role
 
     // Calculate skip value to determine how many documents to skip
     const skip = (page - 1) * limit;
-
+    let filter = {}
+    if (role) {
+      filter.role = role
+    } else {
+      filter.role = ["customer", "user"]
+    }
     // Fetch support requests with pagination and sorting by createdAt
-    const supportRequests = await Support.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const supportRequests = await Support.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
     // Get total number of support requests for pagination metadata
     const total = await Support.countDocuments();

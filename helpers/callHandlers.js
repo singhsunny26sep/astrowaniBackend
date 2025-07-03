@@ -201,8 +201,8 @@ const initiateCall = async (req, res) => {
       roomId: roomId,
     };
 
-    console.log(" ===================================== data ========================================= ");
-    console.log("data: ", data);
+    // console.log(" ===================================== data ========================================= ");
+    // console.log("data: ", data);
 
 
     const token = await creatToken(data);
@@ -217,8 +217,8 @@ const initiateCall = async (req, res) => {
       status: "ongoing",
     });
 
-    console.log(" =============================== session ============================");
-    console.log("session: ", session);
+    // console.log(" =============================== session ============================");
+    // console.log("session: ", session);
 
 
 

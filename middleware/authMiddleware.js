@@ -10,7 +10,7 @@ exports.protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
   // console.log("1");
-  // console.log("token: ", token);
+  console.log("token: ", token);
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Not authorized to access this route" });
@@ -19,7 +19,7 @@ exports.protect = async (req, res, next) => {
     // console.log(token);
 
     const decoded = jwt.verify(token, config.JWT_SECRET);
-    // console.log("decoded: ", decoded);
+    console.log("decoded: ", decoded);
     // console.log("Token issued at:", new Date(decoded.iat * 1000).toISOString());
     // console.log(
     //   "Token expires at:",
@@ -62,9 +62,9 @@ exports.socketAuthenticator = async (socket, next) => {
     const postToken = socket.handshake.headers.auth
     console.log("postToken: ", postToken);
 
-   /*  if (!token) {
-      return next(new Error('Authentication error: No token provided'));
-    } */
+    /*  if (!token) {
+       return next(new Error('Authentication error: No token provided'));
+     } */
 
     // Verify the token
     // const decoded = jwt.verify(token, config.JWT_SECRET);

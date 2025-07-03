@@ -153,7 +153,7 @@ exports.login = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp, fcmToken } = req.body;
     // console.log("req.body: ", req.body);
     const user = await User.findOne({ email });
     if (!user) {
@@ -170,6 +170,7 @@ exports.verifyOTP = async (req, res) => {
     const token = user.getSignedJwtToken({ expiresIn: "30d", secret: process.env.JWT_SECRET, });
     user.isVerified = true;
     user.otp = undefined;
+    user.fcm = fcmToken;
     await user.save();
     res.status(200).json({ success: true, message: "Account verified successfully", token });
   } catch (error) {
@@ -198,7 +199,7 @@ exports.mobileOTPRequest = async (req, res) => {
 
       // Create a new user with the Free plan
       checkUser = new User({
-        email,
+        mobile,
         activePlan: {
           planId: freePlan._id,
           startDate: startDate,
